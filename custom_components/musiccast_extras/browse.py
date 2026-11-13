@@ -582,3 +582,34 @@ async def async_play(musiccast: Any, zone_id: str, media_id: str) -> None:
     }
     if on_last_played_changed:
         on_last_played_changed()
+
+
+ENQUEUE_TYPES = ("play_now", "play_next", "add_to_queue")
+MANAGE_TIMEOUT_MS = 60000
+
+
+async def async_enqueue(musiccast: Any, zone_id: str, media_id: str, kind: str) -> None:
+    """Add the item (track or folder) at the path in ``media_id`` to the play queue.
+
+    The MusicCast app does this with netusb/manageList (documented for
+    bookmarks and the like) and the newer types play_now / play_next /
+    add_to_queue, on the list the menu cursor is on; ``index`` is the item's
+    position in that list.
+    """
+    if kind not in ENQUEUE_TYPES:
+        raise HomeAssistantError(f"Unknown queue action {kind}")
+    source, path, _start, query = parse_id(media_id)
+    if not path or isinstance(path[-1], str):
+        raise HomeAssistantError("Nothing to add here")
+    nav = Navigator(musiccast, zone_id, source)
+    index = path[-1]
+    async with nav.lock:
+        await nav.goto(path[:-1], query)
+        result = await musiccast.device.request_json(
+            "http://{host}/YamahaExtendedControl/v1/netusb/manageList"
+            f"?list_id=main&type={kind}&index={index}&zone={zone_id}"
+            f"&timeout={MANAGE_TIMEOUT_MS}"
+        )
+    code = result.get("response_code") if isinstance(result, dict) else None
+    if code not in (0, None):
+        raise HomeAssistantError(f"The device refused {kind} (response code {code})")

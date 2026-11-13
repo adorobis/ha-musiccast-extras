@@ -12,7 +12,9 @@ integration:
 - **Title, artist, cover, duration and seeking** for media pushed from Home Assistant
   media sources that provide metadata (e.g. [Radio Nowy Świat](https://github.com/adorobis/ha-nowyswiat)).
 - **Resume after a Home Assistant restart** for such media.
-- **The device's own lists in the media browser**: recently played, MusicCast playlists, tuner presets.
+- **The device's own lists in the media browser**: play queue, recently played, MusicCast playlists,
+  tuner presets.
+- **Play next / Add to queue** for tracks and folders from the device's sources.
 - **CD control**: play, pause, stop, skip and track info when a zone plays the CD.
 - **Entities for what each device supports**: signal info, Wi-Fi signal, tuner station and
   RDS/DAB text, alarm, scenes, balance, volume in dB, Surround:AI, Auro-3D, HDMI outputs,
@@ -85,6 +87,8 @@ remembers what each speaker was playing and where (saved every 30 s), and:
 
 At the top of a MusicCast player's media browser, next to the inputs:
 
+- **Play queue**: what the device plays next, with the current track marked ▶. Click an entry to
+  play it (`netusb/managePlayQueue?type=play`).
 - **Recently played**: the device's playback history across all network sources (radio
   stations, Tidal tracks, …). Click to play it again (`netusb/recallRecentItem`).
 - **MusicCast playlists**: the five playlists you build in the MusicCast app. Play a whole
@@ -133,10 +137,28 @@ integration's push updates), so changes made on the device or in the MusicCast a
 quickly. Devices that are offline when the integration starts are skipped; reload MusicCast
 Extras once they are back (or after adding a MusicCast device).
 
+### Play next / Add to queue
+
+MusicCast players support Home Assistant's queue options, so the media browser offers **Play**,
+**Play next** and **Add to queue** for tracks and whole folders (albums, playlists, …) of every
+list source (Server, Tidal, net radio, …), like the MusicCast app (`netusb/manageList` with
+`play_next` / `add_to_queue`). The same works from automations:
+
+```yaml
+action: media_player.play_media
+target:
+  entity_id: media_player.living_room
+data:
+  media_content_id: "<id of a track or folder from the media browser>"
+  media_content_type: music
+  enqueue: next   # or: add
+```
+
+Items that are not from the device's own sources (e.g. media sources) can only be played, not
+queued.
+
 ### Known limits
 
-- **Play queue**: the device's queue can be read, but there is no known command to play an
-  entry from it, so it is not in the media browser.
 - **Several alarms** (`multi_alarm`, e.g. TSX-N237D): only the overall on/off switch can be
   changed; the individual alarms are shown read-only, because the format to change them is not
   documented.
@@ -236,8 +258,9 @@ Dodatki do wbudowanej integracji Yamaha MusicCast:
 - **Tytuł, wykonawca, okładka, czas trwania i przewijanie** dla mediów wysyłanych z Home Assistant
   przez źródła z metadanymi, np. [Radio Nowy Świat](https://github.com/adorobis/ha-nowyswiat).
 - **Wznawianie po restarcie Home Assistant**: od razu, od bieżącego miejsca.
-- **Własne listy urządzenia w przeglądarce mediów**: ostatnio odtwarzane, playlisty MusicCast,
-  zapisane stacje tunera.
+- **Własne listy urządzenia w przeglądarce mediów**: kolejka odtwarzania, ostatnio odtwarzane,
+  playlisty MusicCast, zapisane stacje tunera.
+- **Odtwórz następne / Dodaj do kolejki** dla utworów i folderów ze źródeł urządzenia.
 - **Sterowanie CD**: odtwarzanie, pauza, stop, przewijanie utworów i informacje o płycie.
 - **Encje dla funkcji obsługiwanych przez urządzenie**: parametry sygnału (osobno format,
   częstotliwość, rozdzielczość, przepływność), sygnał Wi-Fi, stacja tunera i tekst RDS/DAB, budzik,

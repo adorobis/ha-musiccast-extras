@@ -24,6 +24,7 @@ from typing import Any
 
 from homeassistant.components import media_source
 from homeassistant.components.media_player import (
+    MediaPlayerEnqueue,
     MediaPlayerEntityFeature,
     MediaPlayerState,
     SearchError,
@@ -198,6 +199,18 @@ def apply() -> None:
         return await browse.async_browse(self.coordinator.musiccast, self._zone_id, our_id)
 
     async def async_play_media(self, media_type, media_id, **kwargs):
+        enqueue = kwargs.get("enqueue")
+        if enqueue in (MediaPlayerEnqueue.NEXT, MediaPlayerEnqueue.ADD):
+            # "Play next" / "Add to queue": only items of the device's lists.
+            if not browse.is_our_id(media_id):
+                raise HomeAssistantError(
+                    "Only items browsed from the device's own sources can be queued"
+                )
+            if self.state == MediaPlayerState.OFF:
+                await self.async_turn_on()
+            kind = "play_next" if enqueue == MediaPlayerEnqueue.NEXT else "add_to_queue"
+            await browse.async_enqueue(self.coordinator.musiccast, self._zone_id, media_id, kind)
+            return None
         if provider := url_playback.provider_for(self.hass, media_id):
             info = await provider(self.hass, media_id)
             if info:
@@ -302,7 +315,9 @@ def apply() -> None:
     def supported_features(self) -> MediaPlayerEntityFeature:
         features = orig_features(self)
         if MediaPlayerEntityFeature.BROWSE_MEDIA in features:
-            features |= MediaPlayerEntityFeature.SEARCH_MEDIA
+            features |= (
+                MediaPlayerEntityFeature.SEARCH_MEDIA | MediaPlayerEntityFeature.MEDIA_ENQUEUE
+            )
         rec = url_playback.is_current(self)
         if rec and rec["seekable"]:
             features |= MediaPlayerEntityFeature.SEEK

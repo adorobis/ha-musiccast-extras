@@ -6,11 +6,13 @@ the device reports the function in system/getFeatures:
 - MusicCast playlists (netusb "mc_playlist"): getMcPlaylistName,
   getMcPlaylist, manageMcPlaylist?type=play;
 - Tuner presets (tuner func_list, per band or "common" depending on the
-  preset type): tuner/getPresetInfo, tuner/recallPreset.
+  preset type): tuner/getPresetInfo, tuner/recallPreset;
+- Play queue (netusb "play_queue"): getPlayQueue and managePlayQueue
+  (type=play, 0-based index), the call the MusicCast app uses.
 
 IDs: mcx:recent[:<num>], mcx:playlists, mcx:playlist:<bank>[:<index>],
-mcx:tuner:<band>[:<num>] (numbers are 1-based like on the device, playlist
-indexes 0-based).
+mcx:tuner:<band>[:<num>], mcx:queue[:<index>] (numbers are 1-based like on
+the device, playlist and queue indexes 0-based).
 """
 
 from __future__ import annotations
@@ -69,6 +71,8 @@ def _tuner_bands(device: MusicCastExtrasDevice) -> list[str]:
 def root_folders(device: MusicCastExtrasDevice) -> list[BrowseMedia]:
     """Return the folders this device supports, for the browser root."""
     folders = []
+    if "play_queue" in device.features.netusb:
+        folders.append(_folder(f"{PREFIX}:queue", "Play queue"))
     if "recent_info" in device.features.netusb:
         folders.append(_folder(f"{PREFIX}:recent", "Recently played"))
     if "mc_playlist" in device.features.netusb:
@@ -82,6 +86,8 @@ async def async_browse(device: MusicCastExtrasDevice, media_id: str) -> BrowseMe
     """Return a folder."""
     parts = media_id.split(":")[1:]
     kind = parts[0] if parts else ""
+    if kind == "queue":
+        return await _queue(device)
     if kind == "recent":
         return await _recent(device)
     if kind == "playlists":
@@ -95,6 +101,29 @@ async def async_browse(device: MusicCastExtrasDevice, media_id: str) -> BrowseMe
     if kind == "tuner" and len(parts) == 2:
         return await _tuner(device, parts[1])
     raise BrowseError(f"Unknown folder {media_id}")
+
+
+async def _queue(device: MusicCastExtrasDevice) -> BrowseMedia:
+    entries: list[dict[str, Any]] = []
+    playing = -1
+    while True:
+        page = await device.get(f"netusb/getPlayQueue?index={len(entries)}")
+        playing = page.get("playing_index", playing)
+        lines = page.get("track_info", [])
+        entries += lines
+        if not lines or len(entries) >= page.get("max_line", 0):
+            break
+    folder = _folder(f"{PREFIX}:queue", "Play queue")
+    folder.children = [
+        _item(
+            f"{PREFIX}:queue:{index}",
+            f"{'▶ ' if index == playing else ''}{entry.get('text') or index + 1}",
+            MediaClass.TRACK,
+            entry.get("thumbnail"),
+        )
+        for index, entry in enumerate(entries)
+    ]
+    return folder
 
 
 async def _recent(device: MusicCastExtrasDevice) -> BrowseMedia:
@@ -180,7 +209,11 @@ async def async_play(device: MusicCastExtrasDevice, zone_id: str, media_id: str)
     """Play an item (or a whole playlist)."""
     parts = media_id.split(":")[1:]
     kind = parts[0] if parts else ""
-    if kind == "recent" and len(parts) == 2:
+    if kind == "queue" and len(parts) == 2:
+        await device.command(
+            f"netusb/managePlayQueue?type=play&index={int(parts[1])}&zone={zone_id}"
+        )
+    elif kind == "recent" and len(parts) == 2:
         await device.command(f"netusb/recallRecentItem?zone={zone_id}&num={int(parts[1])}")
     elif kind == "playlist" and len(parts) in (2, 3):
         index = int(parts[2]) if len(parts) == 3 else 0
