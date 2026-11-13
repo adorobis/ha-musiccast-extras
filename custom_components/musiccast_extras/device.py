@@ -22,6 +22,7 @@ from typing import Any
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
@@ -205,6 +206,20 @@ class MusicCastExtrasDevice(DataUpdateCoordinator[dict[str, Any]]):
     def zone_signal(self, zone_id: str) -> dict[str, Any]:
         """Return the last getSignalInfo audio block of a zone."""
         return (self.data or {}).get("zones", {}).get(zone_id, {}).get("signal", {})
+
+    def zone_name(self, zone_id: str) -> str:
+        """Return the name of the core MusicCast device (zone) in Home Assistant.
+
+        Uses the user's rename if there is one, so the extras' entity IDs
+        match the core ones; falls back to the name the device reports.
+        """
+        identifier = self.core_device_identifier(zone_id)
+        dev_reg = dr.async_get(self.hass)
+        for entry in dr.async_entries_for_config_entry(dev_reg, self.core.config_entry.entry_id):
+            if identifier in entry.identifiers:
+                return entry.name_by_user or entry.name or zone_id
+        zone = self.core.data.zones.get(zone_id)
+        return (zone.name if zone and zone.name else None) or f"{self.model} {zone_id}"
 
     def core_device_identifier(self, zone_id: str) -> tuple[str, str]:
         """Return the core integration's device identifier for a zone."""

@@ -97,7 +97,10 @@ album, position and length, and the device gets an **Eject CD** button (`cd/togg
 
 ### Entities
 
-Added to the existing MusicCast devices (and zone devices) when the device reports the function:
+Created when the device reports the function. Home Assistant keeps each device to one
+integration, so the entities are on a device of the same name **linked** to the MusicCast device
+(or zone): open the MusicCast device and look under **Linked devices**. Their entity IDs follow the
+device name, e.g. `sensor.living_room_wi_fi_signal`.
 
 | Entity | Type | Created when the device reports | API |
 | --- | --- | --- | --- |
@@ -237,6 +240,8 @@ Dodatki do wbudowanej integracji Yamaha MusicCast:
 
 Wszystko jest wykrywane osobno dla każdego urządzenia, na podstawie tego, co ono zgłasza, a nie z
 listy modeli.
+Nowe encje są na urządzeniu o tej samej nazwie, połączonym z urządzeniem MusicCast: otwórz
+urządzenie MusicCast i zajrzyj do sekcji **Połączone urządzenia** (*Linked devices*).
 
 Instalacja: Ustawienia → **Marketplace** (przy pierwszym dodawaniu repozytorium trzeba
 połączyć Marketplace z GitHubem) → ⋮ → *Custom repositories* →

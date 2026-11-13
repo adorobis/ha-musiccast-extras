@@ -38,9 +38,16 @@ class MusicCastExtrasEntity(CoordinatorEntity[MusicCastExtrasDevice]):
         self._attr_translation_key = translation_key or key
         if placeholders:
             self._attr_translation_placeholders = placeholders
-        # Same identifiers as the core integration: the entity shows up on
-        # the existing MusicCast device (or zone device).
-        self._attr_device_info = DeviceInfo(identifiers={device.core_device_identifier(zone_id)})
+        # Same identifiers as the core integration's device (or zone device).
+        # Home Assistant keeps devices per integration, so this becomes a
+        # device linked to the MusicCast one; it gets the same name, so the
+        # entity IDs read like the core ones (sensor.living_room_wifi_signal).
+        self._attr_device_info = DeviceInfo(
+            identifiers={device.core_device_identifier(zone_id)},
+            name=device.zone_name(zone_id),
+            manufacturer="Yamaha Corporation",
+            model=device.model,
+        )
 
     @property
     def zone_status(self) -> dict[str, Any]:

@@ -15,8 +15,9 @@ from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EVENT_HOMEASSISTANT_STARTED, Platform
 from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryError
-from homeassistant.helpers import issue_registry as ir
+from homeassistant.helpers import entity_registry as er, issue_registry as ir
 from homeassistant.helpers.storage import Store
+from homeassistant.util import slugify
 
 from . import browse, device as extras_device, patch, url_playback
 from .const import DOMAIN, LEGACY_DOMAIN
@@ -102,10 +103,44 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         )
     devices = await extras_device.async_create_devices(hass, entry)
     entry.runtime_data = devices
+    _rename_legacy_entity_ids(hass, entry, devices)
     extras_device.REGISTRY.update(devices)
     _LOGGER.info("Extra entities for %d MusicCast device(s)", len(devices))
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
+
+
+@callback
+def _rename_legacy_entity_ids(
+    hass: HomeAssistant, entry: ConfigEntry, devices: dict[str, extras_device.MusicCastExtrasDevice]
+) -> None:
+    """Rename entity IDs from 1.2.0, which were all named after "MusicCast Extras".
+
+    1.2.0 gave its devices no name, so their entities became e.g.
+    button.musiccast_extras_restart_2. Rename them after the MusicCast device
+    (zone) they belong to; IDs the user changed are left alone.
+    """
+    ent_reg = er.async_get(hass)
+    for reg_entry in er.async_entries_for_config_entry(ent_reg, entry.entry_id):
+        platform, object_id = reg_entry.entity_id.split(".", 1)
+        if not object_id.startswith("musiccast_extras"):
+            continue
+        device = next(
+            (d for d in devices.values() if reg_entry.unique_id.startswith(f"{d.device_id}_")),
+            None,
+        )
+        if device is None:
+            continue
+        rest = reg_entry.unique_id[len(device.device_id) + 1 :]
+        zone_id = rest.split("_", 1)[0]
+        if zone_id not in device.features.zones or zone_id == extras_device.MAIN_ZONE:
+            zone_id = extras_device.MAIN_ZONE
+        name = reg_entry.original_name or rest
+        new_id = ent_reg.async_generate_entity_id(
+            platform, slugify(f"{device.zone_name(zone_id)} {name}")
+        )
+        _LOGGER.info("Renaming %s to %s", reg_entry.entity_id, new_id)
+        ent_reg.async_update_entity(reg_entry.entity_id, new_entity_id=new_id)
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
