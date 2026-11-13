@@ -270,8 +270,14 @@ async def async_resume(entity: MusicCastMediaPlayer) -> bool:
     info = await provider(entity.hass, rec["media_id"]) if provider else None
     if not info:
         return False
-    _LOGGER.info("Resuming %s on %s at %s", rec["title"], entity.entity_id, _hms(rec["position"]))
-    await async_play(entity, rec["media_id"], info, rec["position"])
+    position = rec["position"]
+    duration = rec.get("duration")
+    if rec.get("ended") or (duration and position >= duration - END_MARGIN):
+        # It played to its end: Play starts it over (seeking to the very end
+        # is refused by the speaker, which then doesn't start at all).
+        position = 0
+    _LOGGER.info("Resuming %s on %s at %s", rec["title"], entity.entity_id, _hms(position))
+    await async_play(entity, rec["media_id"], info, position)
     return True
 
 
