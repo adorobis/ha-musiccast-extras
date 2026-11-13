@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "MusicCast Extras",
-        "description": "Dodaje do odtwarzaczy Yamaha MusicCast przeglądanie i wyszukiwanie Tidala, tytuł/okładkę/przewijanie dla wysyłanych mediów oraz wznawianie po restarcie. Wymaga integracji Yamaha MusicCast."
+        "description": "Dodaje do urządzeń Yamaha MusicCast: przeglądanie i wyszukiwanie Tidala, ostatnio odtwarzane, playlisty MusicCast i stacje tunera w przeglądarce mediów, sterowanie CD, tytuł/okładkę/przewijanie dla wysyłanych mediów, wznawianie po restarcie oraz encje dla funkcji obsługiwanych przez każde urządzenie (sygnał, Wi-Fi, tuner, budzik, sceny, opcje dźwięku, restart). Wymaga integracji Yamaha MusicCast."
       }
     },
     "abort": {
@@ -23,6 +23,111 @@
       },
       "restart_network": {
         "name": "Restart modułu sieciowego"
+      },
+      "scene": {
+        "name": "Scena {number}"
+      },
+      "cd_eject": {
+        "name": "Wysuń CD"
+      }
+    },
+    "number": {
+      "balance": {
+        "name": "Balans"
+      },
+      "actual_volume": {
+        "name": "Głośność (dB)"
+      },
+      "auro_matic_strength": {
+        "name": "Siła Auro-Matic"
+      },
+      "alarm_volume": {
+        "name": "Głośność budzika"
+      }
+    },
+    "select": {
+      "auro_listening_mode": {
+        "name": "Tryb odsłuchu Auro-3D"
+      },
+      "auro_matic_preset": {
+        "name": "Preset Auro-Matic"
+      },
+      "speaker_pattern": {
+        "name": "Konfiguracja głośników"
+      },
+      "alarm_source": {
+        "name": "Źródło budzika"
+      }
+    },
+    "sensor": {
+      "signal_format": {
+        "name": "Format audio"
+      },
+      "signal_sample_rate": {
+        "name": "Częstotliwość próbkowania"
+      },
+      "signal_bit_depth": {
+        "name": "Rozdzielczość bitowa"
+      },
+      "signal_bitrate": {
+        "name": "Przepływność"
+      },
+      "signal_error": {
+        "name": "Błąd sygnału",
+        "state": {
+          "none": "Brak błędu",
+          "unknown": "Nieznany błąd",
+          "check_cable": "Sprawdź kabel (USB DAC)",
+          "check_pc": "Sprawdź komputer (USB DAC)",
+          "disconnected": "Rozłączony (USB DAC)",
+          "over_fs": "Powyżej 384 kHz (USB DAC)"
+        }
+      },
+      "wifi_signal": {
+        "name": "Sygnał Wi-Fi"
+      },
+      "tuner_band": {
+        "name": "Pasmo tunera"
+      },
+      "tuner_station": {
+        "name": "Stacja tunera"
+      },
+      "tuner_text": {
+        "name": "Tekst tunera (RDS/DAB)"
+      },
+      "multi_alarm": {
+        "name": "Budzik {number}"
+      }
+    },
+    "switch": {
+      "surround_ai": {
+        "name": "Surround:AI"
+      },
+      "adaptive_dsp_level": {
+        "name": "Adaptacyjny poziom DSP"
+      },
+      "mono": {
+        "name": "Mono"
+      },
+      "hdmi_out": {
+        "name": "Wyjście HDMI {number}"
+      },
+      "alarm_on": {
+        "name": "Budzik"
+      },
+      "alarm_enabled": {
+        "name": "Budzik aktywny"
+      },
+      "alarm_beep": {
+        "name": "Sygnał budzika"
+      },
+      "alarm_snooze": {
+        "name": "Drzemka budzika"
+      }
+    },
+    "time": {
+      "alarm_time": {
+        "name": "Godzina budzika"
       }
     }
   }

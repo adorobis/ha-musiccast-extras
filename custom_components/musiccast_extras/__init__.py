@@ -1,7 +1,10 @@
-"""MusicCast Extras: Tidal browsing, metadata, seeking, resume and restart buttons.
+"""MusicCast Extras: more of what MusicCast devices can do, in Home Assistant.
 
-Extends the core Yamaha MusicCast integration (see patch.py for what and
-how). Set up from the UI; removing the integration undoes the changes.
+Extends the core Yamaha MusicCast integration: patches its media player
+(patch.py: Tidal browsing, the device's own lists, CD control, metadata,
+seeking, resume) and adds entities for what each device reports in
+system/getFeatures (device.py and the platforms). Set up from the UI;
+removing the integration undoes the changes.
 """
 
 from __future__ import annotations
@@ -15,13 +18,20 @@ from homeassistant.exceptions import ConfigEntryError
 from homeassistant.helpers import issue_registry as ir
 from homeassistant.helpers.storage import Store
 
-from . import browse, patch, url_playback
+from . import browse, device as extras_device, patch, url_playback
 from .const import DOMAIN, LEGACY_DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
 RESUME_SAVE_INTERVAL = 30  # seconds
-PLATFORMS = [Platform.BUTTON]
+PLATFORMS = [
+    Platform.BUTTON,
+    Platform.NUMBER,
+    Platform.SELECT,
+    Platform.SENSOR,
+    Platform.SWITCH,
+    Platform.TIME,
+]
 
 
 async def _load_store(hass: HomeAssistant, name: str) -> tuple[Store[dict], dict]:
@@ -90,6 +100,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         entry.async_on_unload(
             hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STARTED, _resume_after_restart)
         )
+    devices = await extras_device.async_create_devices(hass, entry)
+    entry.runtime_data = devices
+    extras_device.REGISTRY.update(devices)
+    _LOGGER.info("Extra entities for %d MusicCast device(s)", len(devices))
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 
@@ -98,6 +112,9 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Remove the buttons and undo the patches."""
     if not await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
         return False
+    for device in entry.runtime_data.values():
+        device.async_stop_events()
+    extras_device.REGISTRY.clear()
     patch.remove()
     browse.on_last_played_changed = None
     url_playback.on_resume_changed = None

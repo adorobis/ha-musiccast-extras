@@ -30,7 +30,7 @@ from homeassistant.components.media_player import (
 )
 from homeassistant.exceptions import HomeAssistantError
 
-from . import browse, url_playback
+from . import browse, device as extras_device, library, url_playback
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -43,8 +43,36 @@ ENTITY_METHODS = (
     "async_search_media",
     "async_media_play",
     "async_media_seek",
+    "async_media_pause",
+    "async_media_stop",
+    "async_media_next_track",
+    "async_media_previous_track",
 )
-ENTITY_PROPERTIES = ("media_duration", "supported_features", "source_id", "state")
+# Properties we replace (the CD ones may be inherited from MediaPlayerEntity).
+PATCHED_PROPERTIES = (
+    "media_duration",
+    "supported_features",
+    "state",
+    "media_title",
+    "media_artist",
+    "media_album_name",
+    "media_position",
+    "media_position_updated_at",
+)
+ENTITY_PROPERTIES = (*PATCHED_PROPERTIES, "source_id")
+CD_TRANSPORT = {
+    "async_media_pause": "pause",
+    "async_media_stop": "stop",
+    "async_media_next_track": "next",
+    "async_media_previous_track": "previous",
+}
+CD_FEATURES = (
+    MediaPlayerEntityFeature.PLAY
+    | MediaPlayerEntityFeature.PAUSE
+    | MediaPlayerEntityFeature.STOP
+    | MediaPlayerEntityFeature.NEXT_TRACK
+    | MediaPlayerEntityFeature.PREVIOUS_TRACK
+)
 DEVICE_METHODS = ("select_source", "get_list_info", "return_in_list", "select_list_item")
 PYAMAHA_DEVICE_METHODS = ("dlna_avt_request", "request_json")
 
@@ -88,6 +116,20 @@ def missing_hooks() -> list[str]:
     return missing
 
 
+def _extras(entity: Any) -> extras_device.MusicCastExtrasDevice | None:
+    """Return the extras data of the entity's device, if set up."""
+    return extras_device.REGISTRY.get(entity.coordinator.musiccast.device.ip)
+
+
+def _cd(entity: Any) -> tuple[extras_device.MusicCastExtrasDevice, dict[str, Any]] | None:
+    """Return (device, cd play info) while the zone plays the CD input."""
+    ext = _extras(entity)
+    if ext is None or entity.source_id != "cd":
+        return None
+    info = (ext.data or {}).get("cd")
+    return (ext, info) if info is not None else None
+
+
 def _root_id(media_id: str | None) -> str | None:
     """Map the core root entry "input:<source>" to our ID for path inputs."""
     if media_id:
@@ -108,15 +150,13 @@ def apply() -> None:
     cls = mc_media_player.MusicCastMediaPlayer
     if _originals:
         return
-    orig = {
-        name: cls.__dict__.get(name)
-        for name in (*ENTITY_METHODS, "media_duration", "supported_features")
-    }
+    orig = {name: cls.__dict__.get(name) for name in (*ENTITY_METHODS, *PATCHED_PROPERTIES)}
     orig_browse = cls.async_browse_media
     orig_play = cls.async_play_media
     orig_media_play = cls.async_media_play
     orig_duration = cls.media_duration.fget
     orig_features = cls.supported_features.fget
+    orig_state = cls.state.fget
 
     async def async_browse_media(self, media_content_type=None, media_content_id=None):
         our_id = _root_id(media_content_id) or (
@@ -140,8 +180,14 @@ def apply() -> None:
         if media_content_id == browse.LIBRARY_ID:
             media_content_id = None
             our_id = None
+        if library.is_library_id(media_content_id) and (ext := _extras(self)):
+            return await library.async_browse(ext, media_content_id)
         if our_id is None:
-            return await orig_browse(self, media_content_type, media_content_id)
+            result = await orig_browse(self, media_content_type, media_content_id)
+            if not media_content_id and result.children is not None and (ext := _extras(self)):
+                # The device's own lists, next to the inputs.
+                result.children = [*library.root_folders(ext), *result.children]
+            return result
         if self.state == MediaPlayerState.OFF:
             raise HomeAssistantError("The device has to be turned on to be able to browse media.")
         return await browse.async_browse(self.coordinator.musiccast, self._zone_id, our_id)
@@ -156,6 +202,11 @@ def apply() -> None:
                 except HomeAssistantError as err:
                     # Still play it, the core way (no title/cover/seeking).
                     _LOGGER.warning("Playing %s without metadata: %s", media_id, err)
+        if library.is_library_id(media_id) and (ext := _extras(self)):
+            if self.state == MediaPlayerState.OFF:
+                await self.async_turn_on()
+            await library.async_play(ext, self._zone_id, media_id)
+            return None
         if not browse.is_our_id(media_id):
             return await orig_play(self, media_type, media_id, **kwargs)
         if self.state == MediaPlayerState.OFF:
@@ -183,6 +234,9 @@ def apply() -> None:
         )
 
     async def async_media_play(self) -> None:
+        if cd := _cd(self):
+            await cd[0].command("cd/setPlayback?playback=play")
+            return
         # A pushed stream that stopped (e.g. HA restarted) can't be restarted
         # with the NetUSB play command; push it again at the saved position.
         if (
@@ -203,7 +257,38 @@ def apply() -> None:
         rec = url_playback.is_current(self)
         if rec and rec.get("duration"):
             return int(rec["duration"])
+        if (cd := _cd(self)) and cd[1].get("total_time"):
+            return cd[1]["total_time"]
         return orig_duration(self)
+
+    def state(self):
+        current = orig_state(self)
+        if (cd := _cd(self)) and current != MediaPlayerState.OFF:
+            return {"play": MediaPlayerState.PLAYING, "pause": MediaPlayerState.PAUSED}.get(
+                cd[1].get("playback"), MediaPlayerState.IDLE
+            )
+        return current
+
+    def _cd_transport(name: str, playback: str):
+        original = getattr(cls, name)
+
+        async def method(self) -> None:
+            if cd := _cd(self):
+                await cd[0].command(f"cd/setPlayback?playback={playback}")
+                return
+            await original(self)
+
+        return method
+
+    def _cd_property(name: str, read):
+        original = getattr(cls, name).fget
+
+        def getter(self):
+            if cd := _cd(self):
+                return read(cd[0], cd[1])
+            return original(self)
+
+        return property(getter)
 
     def supported_features(self) -> MediaPlayerEntityFeature:
         features = orig_features(self)
@@ -212,6 +297,8 @@ def apply() -> None:
         rec = url_playback.is_current(self)
         if rec and rec["seekable"]:
             features |= MediaPlayerEntityFeature.SEEK
+        if _cd(self):
+            features |= CD_FEATURES
         return features
 
     cls.async_browse_media = async_browse_media
@@ -221,6 +308,18 @@ def apply() -> None:
     cls.async_media_seek = async_media_seek
     cls.media_duration = property(media_duration)
     cls.supported_features = property(supported_features)
+    cls.state = property(state)
+    for name, playback in CD_TRANSPORT.items():
+        setattr(cls, name, _cd_transport(name, playback))
+    cd_info = {
+        "media_title": lambda ext, cd: cd.get("track") or None,
+        "media_artist": lambda ext, cd: cd.get("artist") or None,
+        "media_album_name": lambda ext, cd: cd.get("album") or None,
+        "media_position": lambda ext, cd: cd.get("play_time"),
+        "media_position_updated_at": lambda ext, cd: (ext.data or {}).get("cd_updated"),
+    }
+    for name, read in cd_info.items():
+        setattr(cls, name, _cd_property(name, read))
     _originals.update(orig)
 
     _original_inputs = MusicCastMediaContent.BROWSABLE_INPUTS

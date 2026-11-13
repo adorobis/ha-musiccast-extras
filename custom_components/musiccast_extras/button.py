@@ -1,129 +1,106 @@
-"""Restart buttons for MusicCast devices.
+"""Buttons: restart, scenes and the CD tray.
 
-The Yamaha Extended Control API (Basic spec rev. 2.00, 4.37 and 4.38) has
-two GET requests, offered only when listed in system/getFeatures func_list:
+Restart uses the Yamaha Extended Control API (Basic spec rev. 2.00, 4.37
+and 4.38) GET requests, offered only when listed in system func_list:
 - requestSystemReboot ("system_reboot"): restarts the whole device;
 - requestNetworkReboot ("network_reboot"): restarts the network module
   (streaming, MusicCast, DLNA), e.g. when it hangs while the amp still works.
-
-The buttons are attached to the devices of the core Yamaha MusicCast
-integration and only created for what a device reports it supports.
+Scenes (recallScene) are created per zone from "scene" and "scene_num".
 """
 
 from __future__ import annotations
 
-from dataclasses import dataclass
 import logging
-from typing import Any
 
-from homeassistant.components.button import (
-    ButtonDeviceClass,
-    ButtonEntity,
-    ButtonEntityDescription,
-)
+from homeassistant.components.button import ButtonDeviceClass, ButtonEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
-from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
+
+from .device import MusicCastExtrasDevice
+from .entity import MusicCastExtrasEntity
 
 _LOGGER = logging.getLogger(__name__)
 
-MUSICCAST_DOMAIN = "yamaha_musiccast"
-API = "http://{host}/YamahaExtendedControl/v1/system/"
-
-
-@dataclass(frozen=True, kw_only=True)
-class RebootDescription(ButtonEntityDescription):
-    """A reboot request and the func_list entry that enables it."""
-
-    feature: str
-    request: str
-
-
 REBOOTS = (
-    RebootDescription(
-        key="restart",
-        translation_key="restart",
-        device_class=ButtonDeviceClass.RESTART,
-        entity_category=EntityCategory.CONFIG,
-        feature="system_reboot",
-        request="requestSystemReboot",
-    ),
-    RebootDescription(
-        key="restart_network",
-        translation_key="restart_network",
-        device_class=ButtonDeviceClass.RESTART,
-        entity_category=EntityCategory.CONFIG,
-        feature="network_reboot",
-        request="requestNetworkReboot",
-    ),
+    ("restart", "system_reboot", "system/requestSystemReboot"),
+    ("restart_network", "network_reboot", "system/requestNetworkReboot"),
 )
 
 
-async def _func_list(coordinator: Any) -> list[str]:
-    """Return the device's system func_list (cached by aiomusiccast if possible)."""
-    musiccast = coordinator.musiccast
-    features = getattr(musiccast, "_features", None) or {}
-    func_list = features.get("system", {}).get("func_list")
-    if func_list is None:
-        features = await musiccast.device.request_json(API + "getFeatures")
-        func_list = features.get("system", {}).get("func_list", [])
-    return list(func_list)
-
-
 async def async_setup_entry(
-    hass: HomeAssistant,
-    entry: ConfigEntry,
-    async_add_entities: AddConfigEntryEntitiesCallback,
+    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
 ) -> None:
-    """Add restart buttons to every loaded MusicCast device."""
-    entities: list[MusicCastRebootButton] = []
-    for mc_entry in hass.config_entries.async_loaded_entries(MUSICCAST_DOMAIN):
-        coordinator = mc_entry.runtime_data
-        try:
-            func_list = await _func_list(coordinator)
-        except Exception as err:
-            _LOGGER.debug("No features from %s: %s", mc_entry.title, err)
-            continue
-        entities.extend(
-            MusicCastRebootButton(coordinator, description)
-            for description in REBOOTS
-            if description.feature in func_list
-        )
+    """Create the buttons each device supports."""
+    entities: list[ButtonEntity] = []
+    for device in entry.runtime_data.values():
+        f = device.features
+        entities += [
+            RebootButton(device, key, path) for key, feature, path in REBOOTS if feature in f.system
+        ]
+        for zone_id, funcs in f.zones.items():
+            count = f.zone(zone_id).get("scene_num") or 0
+            if "scene" in funcs:
+                entities += [SceneButton(device, zone_id, n) for n in range(1, int(count) + 1)]
+        if "cd" in f.inputs:
+            entities.append(CommandButton(device, "cd_eject", "cd/toggleTray", "mdi:eject"))
     async_add_entities(entities)
 
 
-class MusicCastRebootButton(ButtonEntity):
-    """Restart a MusicCast device or its network module."""
+class CommandButton(MusicCastExtrasEntity, ButtonEntity):
+    """A button sending one GET request."""
 
-    _attr_has_entity_name = True
-    entity_description: RebootDescription
-
-    def __init__(self, coordinator: Any, description: RebootDescription) -> None:
-        """Initialize the button."""
-        self.coordinator = coordinator
-        self.entity_description = description
-        device_id = coordinator.data.device_id
-        self._attr_unique_id = f"{device_id}_{description.key}"
-        # Same identifiers as the core integration: the button shows up on
-        # the existing MusicCast device.
-        self._attr_device_info = DeviceInfo(identifiers={(MUSICCAST_DOMAIN, device_id)})
+    def __init__(self, device: MusicCastExtrasDevice, key: str, path: str, icon: str) -> None:
+        """Initialize."""
+        super().__init__(device, key)
+        self._path = path
+        self._attr_icon = icon
 
     async def async_press(self) -> None:
-        """Send the reboot request."""
-        musiccast = self.coordinator.musiccast
+        """Send the request."""
+        await self.device.command(self._path)
+
+
+class RebootButton(MusicCastExtrasEntity, ButtonEntity):
+    """Restart a MusicCast device or its network module."""
+
+    _attr_device_class = ButtonDeviceClass.RESTART
+    _attr_entity_category = EntityCategory.CONFIG
+
+    def __init__(self, device: MusicCastExtrasDevice, key: str, path: str) -> None:
+        """Initialize."""
+        super().__init__(device, key)
+        self._path = path
+
+    async def async_press(self) -> None:
+        """Send the reboot request (no refresh: the device goes away)."""
         try:
-            result = await musiccast.device.request_json(API + self.entity_description.request)
+            await self.device.get(self._path)
+        except HomeAssistantError:
+            raise
         except Exception as err:
             raise HomeAssistantError(f"Restart request failed: {err}") from err
-        code = result.get("response_code") if isinstance(result, dict) else None
-        if code not in (0, None):
-            raise HomeAssistantError(f"The device refused the restart (response code {code})")
-        _LOGGER.info(
-            "Requested %s on %s (%s)",
-            self.entity_description.request,
-            self.coordinator.data.model_name,
-            musiccast.device.ip,
+        _LOGGER.info("Requested %s on %s (%s)", self._path, self.device.model, self.device.host)
+
+
+class SceneButton(MusicCastExtrasEntity, ButtonEntity):
+    """Recall a scene of a zone."""
+
+    _attr_icon = "mdi:palette"
+
+    def __init__(self, device: MusicCastExtrasDevice, zone_id: str, number: int) -> None:
+        """Initialize."""
+        super().__init__(
+            device,
+            f"scene_{number}",
+            zone_id=zone_id,
+            translation_key="scene",
+            placeholders={"number": str(number)},
         )
+        self._number = number
+
+    async def async_press(self) -> None:
+        """Recall the scene."""
+        await self.device.command(f"{self.zone_id}/recallScene?num={self._number}")

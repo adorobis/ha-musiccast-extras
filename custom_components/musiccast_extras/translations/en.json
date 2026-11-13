@@ -3,7 +3,7 @@
     "step": {
       "user": {
         "title": "MusicCast Extras",
-        "description": "Adds Tidal browsing and search, title/cover/seeking for pushed media and resume after restarts to your Yamaha MusicCast players. Requires the Yamaha MusicCast integration."
+        "description": "Adds to your Yamaha MusicCast devices: Tidal browsing and search, recently played, MusicCast playlists and tuner presets in the media browser, CD control, title/cover/seeking for pushed media, resume after restarts, and entities for what each device supports (signal info, Wi-Fi signal, tuner, alarm, scenes, sound options, restart). Requires the Yamaha MusicCast integration."
       }
     },
     "abort": {
@@ -23,6 +23,111 @@
       },
       "restart_network": {
         "name": "Restart network module"
+      },
+      "scene": {
+        "name": "Scene {number}"
+      },
+      "cd_eject": {
+        "name": "Eject CD"
+      }
+    },
+    "number": {
+      "balance": {
+        "name": "Balance"
+      },
+      "actual_volume": {
+        "name": "Volume (dB)"
+      },
+      "auro_matic_strength": {
+        "name": "Auro-Matic strength"
+      },
+      "alarm_volume": {
+        "name": "Alarm volume"
+      }
+    },
+    "select": {
+      "auro_listening_mode": {
+        "name": "Auro-3D listening mode"
+      },
+      "auro_matic_preset": {
+        "name": "Auro-Matic preset"
+      },
+      "speaker_pattern": {
+        "name": "Speaker pattern"
+      },
+      "alarm_source": {
+        "name": "Alarm source"
+      }
+    },
+    "sensor": {
+      "signal_format": {
+        "name": "Audio format"
+      },
+      "signal_sample_rate": {
+        "name": "Sample rate"
+      },
+      "signal_bit_depth": {
+        "name": "Bit depth"
+      },
+      "signal_bitrate": {
+        "name": "Bitrate"
+      },
+      "signal_error": {
+        "name": "Signal error",
+        "state": {
+          "none": "No error",
+          "unknown": "Unknown error",
+          "check_cable": "Check cable (USB DAC)",
+          "check_pc": "Check PC (USB DAC)",
+          "disconnected": "Disconnected (USB DAC)",
+          "over_fs": "Over 384 kHz (USB DAC)"
+        }
+      },
+      "wifi_signal": {
+        "name": "Wi-Fi signal"
+      },
+      "tuner_band": {
+        "name": "Tuner band"
+      },
+      "tuner_station": {
+        "name": "Tuner station"
+      },
+      "tuner_text": {
+        "name": "Tuner text"
+      },
+      "multi_alarm": {
+        "name": "Alarm {number}"
+      }
+    },
+    "switch": {
+      "surround_ai": {
+        "name": "Surround:AI"
+      },
+      "adaptive_dsp_level": {
+        "name": "Adaptive DSP level"
+      },
+      "mono": {
+        "name": "Mono"
+      },
+      "hdmi_out": {
+        "name": "HDMI out {number}"
+      },
+      "alarm_on": {
+        "name": "Alarm"
+      },
+      "alarm_enabled": {
+        "name": "Alarm enabled"
+      },
+      "alarm_beep": {
+        "name": "Alarm beep"
+      },
+      "alarm_snooze": {
+        "name": "Alarm snooze"
+      }
+    },
+    "time": {
+      "alarm_time": {
+        "name": "Alarm time"
       }
     }
   }
