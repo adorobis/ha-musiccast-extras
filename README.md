@@ -1,6 +1,6 @@
 # MusicCast Extras for Home Assistant
 
-[![hacs][hacs-badge]][hacs-url]
+[![Marketplace][marketplace-badge]][marketplace-url]
 [![Validate][validate-badge]][validate-url]
 
 Extra features for the built-in [Yamaha MusicCast](https://www.home-assistant.io/integrations/yamaha_musiccast/)
@@ -83,14 +83,23 @@ Restarting the network module helps when streaming hangs while the amplifier its
 
 ## Installation
 
-### HACS / Marketplace
+### Marketplace (recommended)
 
-1. ⋮ → **Custom repositories** → add `https://github.com/adorobis/ha-musiccast-extras`,
-   type **Integration**.
-2. Download **MusicCast Extras** and restart Home Assistant.
-3. Settings → Devices & services → **Add integration** → **MusicCast Extras** → Submit.
+Install it from the Home Assistant **Marketplace** as a custom repository:
 
-[![Open in HACS][my-hacs-badge]][my-hacs-url]
+1. Settings → **Marketplace**. Adding custom repositories needs the Marketplace to be connected
+   to GitHub; it asks for that the first time.
+2. ⋮ → **Custom repositories** → add `https://github.com/adorobis/ha-musiccast-extras`, type
+   **Integration**.
+3. Open **MusicCast Extras**, **Download** it and restart Home Assistant.
+4. Settings → Devices & services → **Add integration** → **MusicCast Extras** → Submit.
+
+Or open the repository in your Marketplace directly:
+
+[![Open in your Home Assistant Marketplace][my-badge]][my-url]
+
+Updates then show up in Home Assistant like any other update. Restart Home Assistant after
+installing or updating, before using the new version.
 
 ### Manual
 
@@ -159,9 +168,11 @@ Dodatki do wbudowanej integracji Yamaha MusicCast:
 - **Wznawianie po restarcie Home Assistant**: od razu, od bieżącego miejsca.
 - **Przyciski restartu**: restart urządzenia albo samego modułu sieciowego.
 
-Instalacja: Marketplace/HACS → ⋮ → *Custom repositories* →
+Instalacja: Ustawienia → **Marketplace** (przy pierwszym dodawaniu repozytorium trzeba
+połączyć Marketplace z GitHubem) → ⋮ → *Custom repositories* →
 `https://github.com/adorobis/ha-musiccast-extras` (typ *Integration*) → pobierz **MusicCast Extras**
-→ restart → Ustawienia → Urządzenia i usługi → *Dodaj integrację* → **MusicCast Extras**.
+→ restart HA → Ustawienia → Urządzenia i usługi → *Dodaj integrację* → **MusicCast Extras**.
+Po każdej instalacji i aktualizacji zrestartuj HA, zanim zaczniesz używać nowej wersji.
 
 Dodatek nie zastępuje integracji MusicCast, tylko ją rozszerza. Jeśli aktualizacja Home Assistant
 zmieni integrację MusicCast, dodatki się wyłączą (z komunikatem w naprawach), a sam MusicCast będzie
@@ -171,9 +182,9 @@ działał dalej.
 
 [MIT](LICENSE)
 
-[hacs-badge]: https://img.shields.io/badge/HACS-Custom-41BDF5.svg
-[hacs-url]: https://hacs.xyz
+[marketplace-badge]: https://img.shields.io/badge/Marketplace-custom%20repository-41BDF5.svg
+[marketplace-url]: https://www.home-assistant.io/integrations/marketplace
 [validate-badge]: https://github.com/adorobis/ha-musiccast-extras/actions/workflows/validate.yml/badge.svg
 [validate-url]: https://github.com/adorobis/ha-musiccast-extras/actions/workflows/validate.yml
-[my-hacs-badge]: https://my.home-assistant.io/badges/hacs_repository.svg
-[my-hacs-url]: https://my.home-assistant.io/redirect/hacs_repository/?owner=adorobis&repository=ha-musiccast-extras&category=integration
+[my-badge]: https://my.home-assistant.io/badges/marketplace_repository.svg
+[my-url]: https://my.home-assistant.io/redirect/marketplace_repository/?owner=adorobis&repository=ha-musiccast-extras&category=integration
