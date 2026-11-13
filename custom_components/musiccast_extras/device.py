@@ -158,6 +158,9 @@ class MusicCastExtrasDevice(DataUpdateCoordinator[dict[str, Any]]):
     # ------------------------------------------------------------ polling
 
     async def _async_update_data(self) -> dict[str, Any]:
+        if self.hass.is_stopping:
+            # The HTTP session closes during shutdown; keep the last data.
+            return self.data or {"zones": {}}
         f = self.features
         data: dict[str, Any] = {"zones": {}}
         try:
@@ -185,7 +188,8 @@ class MusicCastExtrasDevice(DataUpdateCoordinator[dict[str, Any]]):
 
         @callback
         def _on_event() -> None:
-            self.hass.async_create_task(self.async_request_refresh())
+            if not self.hass.is_stopping:
+                self.hass.async_create_task(self.async_request_refresh())
 
         self.musiccast.register_callback(_on_event)
         self._unsub_event = _on_event
@@ -207,17 +211,30 @@ class MusicCastExtrasDevice(DataUpdateCoordinator[dict[str, Any]]):
         """Return the last getSignalInfo audio block of a zone."""
         return (self.data or {}).get("zones", {}).get(zone_id, {}).get("signal", {})
 
+    def core_device_entry(self, zone_id: str) -> dr.DeviceEntry | None:
+        """Return the core integration's registered device for a zone."""
+        identifier = self.core_device_identifier(zone_id)
+        dev_reg = dr.async_get(self.hass)
+        for entry in dr.async_entries_for_config_entry(dev_reg, self.core.config_entry.entry_id):
+            if identifier in entry.identifiers:
+                return entry
+        return None
+
+    def zone_of_unique_id(self, unique_id: str) -> str | None:
+        """Return the zone an extras entity belongs to, None if not this device's."""
+        if not unique_id.startswith(f"{self.device_id}_"):
+            return None
+        zone_id = unique_id[len(self.device_id) + 1 :].split("_", 1)[0]
+        return zone_id if zone_id in self.features.zones else MAIN_ZONE
+
     def zone_name(self, zone_id: str) -> str:
         """Return the name of the core MusicCast device (zone) in Home Assistant.
 
         Uses the user's rename if there is one, so the extras' entity IDs
         match the core ones; falls back to the name the device reports.
         """
-        identifier = self.core_device_identifier(zone_id)
-        dev_reg = dr.async_get(self.hass)
-        for entry in dr.async_entries_for_config_entry(dev_reg, self.core.config_entry.entry_id):
-            if identifier in entry.identifiers:
-                return entry.name_by_user or entry.name or zone_id
+        if core_device := self.core_device_entry(zone_id):
+            return core_device.name_by_user or core_device.name or zone_id
         zone = self.core.data.zones.get(zone_id)
         return (zone.name if zone and zone.name else None) or f"{self.model} {zone_id}"
 
