@@ -11,6 +11,7 @@ integration:
 - **Title, artist, cover, duration and seeking** for media pushed from Home Assistant
   media sources that provide metadata (e.g. [Radio Nowy Świat](https://github.com/adorobis/ha-nowyswiat)).
 - **Resume after a Home Assistant restart** for such media.
+- **Restart buttons**: restart a device, or just its network module.
 
 It does not replace the MusicCast integration: it adds to it, so you keep getting
 Home Assistant's own MusicCast updates. [Po polsku ↓](#po-polsku)
@@ -66,6 +67,14 @@ remembers what each speaker was playing and where (saved every 30 s), and:
   it, at their live position (a gap of a second or two);
 - resumes speakers that stopped less than 10 minutes ago, unless you stopped or paused them yourself;
 - **Play** in Home Assistant on a stopped speaker resumes at the saved position.
+
+### Restart buttons
+
+The Yamaha Extended Control API can restart a device (`system/requestSystemReboot`) or only its
+network module (`system/requestNetworkReboot`), which handles streaming, MusicCast and DLNA. Each
+device gets a **Restart** and/or **Restart network module** button, depending on what it reports
+in `system/getFeatures`, on its existing MusicCast device page (*Configuration* section).
+Restarting the network module helps when streaming hangs while the amplifier itself still works.
 
 ## Requirements
 
@@ -148,6 +157,7 @@ Dodatki do wbudowanej integracji Yamaha MusicCast:
 - **Tytuł, wykonawca, okładka, czas trwania i przewijanie** dla mediów wysyłanych z Home Assistant
   przez źródła z metadanymi, np. [Radio Nowy Świat](https://github.com/adorobis/ha-nowyswiat).
 - **Wznawianie po restarcie Home Assistant**: od razu, od bieżącego miejsca.
+- **Przyciski restartu**: restart urządzenia albo samego modułu sieciowego.
 
 Instalacja: Marketplace/HACS → ⋮ → *Custom repositories* →
 `https://github.com/adorobis/ha-musiccast-extras` (typ *Integration*) → pobierz **MusicCast Extras**

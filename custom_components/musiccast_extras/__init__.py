@@ -1,4 +1,4 @@
-"""MusicCast Extras: Tidal browsing, metadata, seeking and resume for MusicCast.
+"""MusicCast Extras: Tidal browsing, metadata, seeking, resume and restart buttons.
 
 Extends the core Yamaha MusicCast integration (see patch.py for what and
 how). Set up from the UI; removing the integration undoes the changes.
@@ -9,7 +9,7 @@ from __future__ import annotations
 import logging
 
 from homeassistant.config_entries import ConfigEntry
-from homeassistant.const import EVENT_HOMEASSISTANT_STARTED
+from homeassistant.const import EVENT_HOMEASSISTANT_STARTED, Platform
 from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryError
 from homeassistant.helpers import issue_registry as ir
@@ -21,6 +21,7 @@ from .const import DOMAIN, LEGACY_DOMAIN
 _LOGGER = logging.getLogger(__name__)
 
 RESUME_SAVE_INTERVAL = 30  # seconds
+PLATFORMS = [Platform.BUTTON]
 
 
 async def _load_store(hass: HomeAssistant, name: str) -> tuple[Store[dict], dict]:
@@ -89,11 +90,14 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         entry.async_on_unload(
             hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STARTED, _resume_after_restart)
         )
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Undo the patches."""
+    """Remove the buttons and undo the patches."""
+    if not await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
+        return False
     patch.remove()
     browse.on_last_played_changed = None
     url_playback.on_resume_changed = None

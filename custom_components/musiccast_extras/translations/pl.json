@@ -15,5 +15,15 @@
       "title": "MusicCast Extras nie jest zgodne z tą wersją Home Assistant",
       "description": "MusicCast Extras nie zostało włączone, bo integracja Yamaha MusicCast się zmieniła. Brakuje: {missing}. MusicCast działa dalej bez dodatków. Sprawdź, czy jest aktualizacja MusicCast Extras."
     }
+  },
+  "entity": {
+    "button": {
+      "restart": {
+        "name": "Restart"
+      },
+      "restart_network": {
+        "name": "Restart modułu sieciowego"
+      }
+    }
   }
 }
