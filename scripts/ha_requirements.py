@@ -1,10 +1,12 @@
-"""Print the pip requirements of the core yamaha_musiccast integration."""
+"""Print the pip requirements of the core yamaha_musiccast integration.
 
+Reads its manifest from disk: importing the package would already need them.
+"""
+
+import importlib.util
 import json
 from pathlib import Path
 
-import homeassistant.components.yamaha_musiccast as mc
-
-print(
-    "\n".join(json.loads((Path(mc.__file__).parent / "manifest.json").read_text())["requirements"])
-)
+spec = importlib.util.find_spec("homeassistant")
+manifest = Path(spec.origin).parent / "components" / "yamaha_musiccast" / "manifest.json"
+print("\n".join(json.loads(manifest.read_text())["requirements"]))
