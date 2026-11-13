@@ -1,4 +1,4 @@
-"""Path-based browsing and search of a MusicCast netusb list (used for Tidal).
+"""Path-based browsing and search of MusicCast netusb lists (Server, Tidal, ...).
 
 The player keeps one menu cursor per device. The core integration's browse
 IDs ("list:tidal:<layer>:<index>") only say "item <index> of whatever list

@@ -6,7 +6,8 @@
 Extra features for the built-in [Yamaha MusicCast](https://www.home-assistant.io/integrations/yamaha_musiccast/)
 integration:
 
-- **Tidal in the media browser**: reliable browsing, search, and "continue where you left off".
+- **Media browsing that plays what you clicked**, for Server (DLNA), net radio, USB, Tidal, Qobuz,
+  Deezer, Amazon Music and the other list sources, with search and "continue where you left off".
 - **Search box** on MusicCast players.
 - **Title, artist, cover, duration and seeking** for media pushed from Home Assistant
   media sources that provide metadata (e.g. [Radio Nowy Świat](https://github.com/adorobis/ha-nowyswiat)).
@@ -25,30 +26,35 @@ Home Assistant's own MusicCast updates. [Po polsku ↓](#po-polsku)
 
 ## Features
 
-### Tidal browsing that plays what you clicked
+### Browsing that plays what you clicked
 
-The core integration doesn't list Tidal in the media browser. Even if it did, its browse IDs
-only say "item *n* at menu level *m*". The speaker has a single menu cursor, and the media
-browser re-opens parent folders for its header and back button, so the cursor can end up on a
-different list than the one on screen. Then the wrong album plays.
+The core integration's browse IDs only say "item *n* at menu level *m*". The speaker has a single
+menu cursor, and the media browser re-opens parent folders for its header and back button, so the
+cursor can end up on a different list than the one on screen. Then the wrong folder, album or
+track plays. The core integration also doesn't list Tidal at all.
 
-MusicCast Extras gives every item an ID with its **full path** from the Tidal root menu (and
+MusicCast Extras gives every item an ID with its **full path** from the source's root menu (and
 search text, if any). Before every browse or play it walks the speaker's cursor to exactly that
-list and waits for the speaker to get there.
+list and waits for the speaker to get there. This covers every list source the core integration
+browses (**Server** / DLNA media servers, **net radio**, **USB**, Qobuz, Deezer, Amazon Music,
+Napster, Juke, …) plus **Tidal**, on the devices that have them.
 
-- Browse *My music*, playlists, albums (all sort orders), artists, mixes, …
-- **Search** Tidal from the media browser's search box.
-- **Continue: <list>**: the list you last played from, at the top of the Tidal folder. The
-  player card's *Browse media* opens it directly while the speaker is on Tidal, with
+- Browse folders, playlists, albums (all sort orders), artists, stations, …
+- **Search** the source you are in from the media browser's search box (sources whose menu has a
+  search entry, e.g. Tidal, Qobuz, Deezer, net radio).
+- **Continue: <list>**: the list you last played from, at the top of that source's folder. The
+  player card's *Browse media* opens it directly while the speaker is on that source, with
   **Library (all sources)**, **Up one level** and **Previous page** entries.
-- Dashboard link to the last list:
-  `/media-browser/<entity_id>/music%2Cmctidal%3Atidal%3A%40last%3A0`
+- Dashboard link to the last list of a source:
+  `/media-browser/<entity_id>/music%2Cmctidal%3A<source>%3A%40last%3A0`
+  (e.g. `<source>` = `tidal` or `server`).
 - Tidal covers are loaded over HTTPS, so they also show when Home Assistant is served over HTTPS.
 
 ### Search
 
-MusicCast players get the *search* feature. Searching in a Tidal folder searches Tidal; searching
-inside a media source folder uses that source's search, if it has one.
+MusicCast players get the *search* feature. Searching in a source's folder searches that source
+(if its menu has a search entry); searching inside a media source folder uses that source's
+search, if it has one. Outside a folder, the source the player is on is searched.
 
 ### Pushed media with title, cover and seeking
 
@@ -223,8 +229,9 @@ logger:
 
 Dodatki do wbudowanej integracji Yamaha MusicCast:
 
-- **Tidal w przeglądarce mediów**: niezawodne przeglądanie (zawsze gra to, co kliknięto),
-  wyszukiwanie i pozycja „Continue” z ostatnio odtwarzaną listą.
+- **Przeglądanie mediów, które zawsze gra to, co kliknięto**: Server (serwery DLNA), radio
+  internetowe, USB, Tidal, Qobuz, Deezer, Amazon Music i pozostałe źródła z listami, z
+  wyszukiwaniem i pozycją „Continue” z ostatnio odtwarzaną listą.
 - **Wyszukiwarka** na odtwarzaczach MusicCast.
 - **Tytuł, wykonawca, okładka, czas trwania i przewijanie** dla mediów wysyłanych z Home Assistant
   przez źródła z metadanymi, np. [Radio Nowy Świat](https://github.com/adorobis/ha-nowyswiat).

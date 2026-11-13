@@ -7,7 +7,9 @@ Patched on MusicCastMediaPlayer (class level, so existing entities get it):
 - async_media_play: resume a pushed stream that stopped.
 - async_media_seek, media_duration, supported_features: seeking and the
   duration of pushed items; SEARCH_MEDIA for every browsable player.
-And "tidal" is added to aiomusiccast's MusicCastMediaContent.BROWSABLE_INPUTS.
+Path-based browsing (browse.py) covers every input the core integration
+browses (aiomusiccast's MusicCastMediaContent.BROWSABLE_INPUTS: server,
+net_radio, usb, qobuz, deezer, ...) plus Tidal, which is added to that list.
 
 Everything is undone by remove(), so the integration can be unloaded
 without a restart. missing_hooks() lists what this relies on and is checked
@@ -34,7 +36,10 @@ from . import browse, device as extras_device, library, url_playback
 
 _LOGGER = logging.getLogger(__name__)
 
-PATH_INPUTS = ("tidal",)
+# Inputs browsed with full-path IDs: the core's browsable inputs plus these.
+EXTRA_PATH_INPUTS = ("tidal",)
+PATH_INPUTS: tuple[str, ...] = EXTRA_PATH_INPUTS  # set by apply()
+SEARCH_FALLBACK = "tidal"  # searched when the player is not on a list input
 
 # What we replace or call on the core entity and in aiomusiccast.
 ENTITY_METHODS = (
@@ -141,7 +146,7 @@ def _root_id(media_id: str | None) -> str | None:
 
 def apply() -> None:
     """Patch the core MusicCast media player."""
-    global _original_inputs  # noqa: PLW0603
+    global _original_inputs, PATH_INPUTS  # noqa: PLW0603
     from aiomusiccast.musiccast_media_content import MusicCastMediaContent  # noqa: PLC0415
     from homeassistant.components.yamaha_musiccast import (  # noqa: PLC0415
         media_player as mc_media_player,
@@ -218,9 +223,13 @@ def apply() -> None:
         if query.media_content_id and media_source.is_media_source_id(query.media_content_id):
             # Searching inside a media source (if the source supports it).
             return await media_source.async_search_media(self.hass, query.media_content_id, query)
-        source = PATH_INPUTS[0]
+        # Search the source being browsed, else the one the player is on.
         if browse.is_our_id(query.media_content_id):
             source = browse.parse_id(query.media_content_id)[0]
+        elif self.source_id in PATH_INPUTS:
+            source = self.source_id
+        else:
+            source = SEARCH_FALLBACK
         if source not in PATH_INPUTS:
             raise SearchError(f"Search is not supported for {source}")
         if self.state == MediaPlayerState.OFF:
@@ -323,14 +332,15 @@ def apply() -> None:
     _originals.update(orig)
 
     _original_inputs = MusicCastMediaContent.BROWSABLE_INPUTS
-    missing = tuple(i for i in PATH_INPUTS if i not in _original_inputs)
+    PATH_INPUTS = tuple(dict.fromkeys((*_original_inputs, *EXTRA_PATH_INPUTS)))
+    missing = tuple(i for i in EXTRA_PATH_INPUTS if i not in _original_inputs)
     if missing:
         MusicCastMediaContent.BROWSABLE_INPUTS = _original_inputs + missing
 
 
 def remove() -> None:
     """Undo apply()."""
-    global _original_inputs  # noqa: PLW0603
+    global _original_inputs, PATH_INPUTS  # noqa: PLW0603
     if not _originals:
         return
     from aiomusiccast.musiccast_media_content import MusicCastMediaContent  # noqa: PLC0415
@@ -350,3 +360,4 @@ def remove() -> None:
     if _original_inputs is not None:
         MusicCastMediaContent.BROWSABLE_INPUTS = _original_inputs
         _original_inputs = None
+    PATH_INPUTS = EXTRA_PATH_INPUTS
