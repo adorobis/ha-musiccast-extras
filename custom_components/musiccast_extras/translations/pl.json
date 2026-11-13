@@ -1,0 +1,19 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "MusicCast Extras",
+        "description": "Dodaje do odtwarzaczy Yamaha MusicCast przeglądanie i wyszukiwanie Tidala, tytuł/okładkę/przewijanie dla wysyłanych mediów oraz wznawianie po restarcie. Wymaga integracji Yamaha MusicCast."
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "MusicCast Extras jest już skonfigurowane."
+    }
+  },
+  "issues": {
+    "incompatible": {
+      "title": "MusicCast Extras nie jest zgodne z tą wersją Home Assistant",
+      "description": "MusicCast Extras nie zostało włączone, bo integracja Yamaha MusicCast się zmieniła. Brakuje: {missing}. MusicCast działa dalej bez dodatków. Sprawdź, czy jest aktualizacja MusicCast Extras."
+    }
+  }
+}

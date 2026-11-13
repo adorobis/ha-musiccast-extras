@@ -1,0 +1,19 @@
+{
+  "domain": "musiccast_extras",
+  "name": "MusicCast Extras",
+  "codeowners": [
+    "@adorobis"
+  ],
+  "config_flow": true,
+  "dependencies": [
+    "media_source",
+    "yamaha_musiccast"
+  ],
+  "documentation": "https://github.com/adorobis/ha-musiccast-extras",
+  "integration_type": "service",
+  "iot_class": "local_push",
+  "issue_tracker": "https://github.com/adorobis/ha-musiccast-extras/issues",
+  "requirements": [],
+  "single_config_entry": true,
+  "version": "1.0.0"
+}

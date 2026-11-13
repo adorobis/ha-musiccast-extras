@@ -1,0 +1,19 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "MusicCast Extras",
+        "description": "Adds Tidal browsing and search, title/cover/seeking for pushed media and resume after restarts to your Yamaha MusicCast players. Requires the Yamaha MusicCast integration."
+      }
+    },
+    "abort": {
+      "single_instance_allowed": "MusicCast Extras is already set up."
+    }
+  },
+  "issues": {
+    "incompatible": {
+      "title": "MusicCast Extras is not compatible with this Home Assistant version",
+      "description": "MusicCast Extras was not enabled because the Yamaha MusicCast integration changed. Missing: {missing}. MusicCast keeps working without the extras. Check for an update of MusicCast Extras."
+    }
+  }
+}
