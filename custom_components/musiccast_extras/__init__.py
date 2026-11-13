@@ -24,7 +24,7 @@ from homeassistant.helpers import (
 from homeassistant.helpers.storage import Store
 from homeassistant.util import slugify
 
-from . import browse, device as extras_device, patch, url_playback
+from . import browse, device as extras_device, patch, url_playback, url_queue
 from .const import DOMAIN, LEGACY_DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
@@ -92,6 +92,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         resume_store.async_delay_save(lambda: dict(url_playback.resume), deadline["at"] - now)
 
     url_playback.on_resume_changed = _save_resume
+
+    queue_store, queues = await _load_store(hass, "url_queue")
+    url_queue.queues.clear()
+    url_queue.queues.update(queues)
+
+    def _save_queue() -> None:
+        queue_store.async_delay_save(lambda: dict(url_queue.queues), 2)
+
+    url_queue.on_queue_changed = _save_queue
+    url_playback.on_ended = url_queue.on_ended
 
     patch.apply()
     _LOGGER.info("MusicCast extras enabled (path browsing for %s)", patch.PATH_INPUTS)
@@ -175,4 +185,6 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     patch.remove()
     browse.on_last_played_changed = None
     url_playback.on_resume_changed = None
+    url_playback.on_ended = None
+    url_queue.on_queue_changed = None
     return True

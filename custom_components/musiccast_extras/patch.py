@@ -5,6 +5,8 @@ Patched on MusicCastMediaPlayer (class level, so existing entities get it):
   path-based browsing, playing and search (browse.py); pushed media-source
   items with metadata (url_playback.py); search inside media sources.
 - async_media_play: resume a pushed stream that stopped.
+- async_media_next_track and enqueue: the queue of pushed media-source
+  items kept in Home Assistant (url_queue.py).
 - async_media_seek, media_duration, supported_features: seeking and the
   duration of pushed items; SEARCH_MEDIA for every browsable player.
 Path-based browsing (browse.py) covers every input the core integration
@@ -33,7 +35,7 @@ from homeassistant.components.media_player import (
 )
 from homeassistant.exceptions import HomeAssistantError
 
-from . import browse, device as extras_device, library, url_playback
+from . import browse, device as extras_device, library, url_playback, url_queue
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -165,6 +167,11 @@ def apply() -> None:
     orig_state = cls.state.fget
 
     async def async_browse_media(self, media_content_type=None, media_content_id=None):
+        if url_queue.is_queue_id(media_content_id):
+            folder_id = url_queue.set_mode(self, media_content_id)
+            if folder_id is None:
+                return url_queue.browse_queue(self, media_content_id)
+            return await async_browse_media(self, media_content_type, folder_id)
         our_id = _root_id(media_content_id) or (
             media_content_id if browse.is_our_id(media_content_id) else None
         )
@@ -193,6 +200,8 @@ def apply() -> None:
             if not media_content_id and result.children is not None and (ext := _extras(self)):
                 # The device's own lists, next to the inputs.
                 result.children = [*library.root_folders(ext), *result.children]
+            if media_content_id and media_source.is_media_source_id(media_content_id):
+                result = url_queue.decorate(self, result)
             return result
         if self.state == MediaPlayerState.OFF:
             raise HomeAssistantError("The device has to be turned on to be able to browse media.")
@@ -200,6 +209,18 @@ def apply() -> None:
 
     async def async_play_media(self, media_type, media_id, **kwargs):
         enqueue = kwargs.get("enqueue")
+        if url_queue.is_queue_id(media_id):
+            if self.state == MediaPlayerState.OFF:
+                await self.async_turn_on()
+            await url_queue.async_play(self, media_id)
+            return None
+        provider = url_playback.provider_for(self.hass, media_id)
+        if provider and enqueue in (MediaPlayerEnqueue.NEXT, MediaPlayerEnqueue.ADD):
+            # Media-source items go to the queue kept in Home Assistant.
+            kind = "play_next" if enqueue == MediaPlayerEnqueue.NEXT else "add_to_queue"
+            entry = await url_queue.async_entry_for(self.hass, media_id)
+            await url_queue.async_enqueue(self, [entry], kind)
+            return None
         if enqueue in (MediaPlayerEnqueue.NEXT, MediaPlayerEnqueue.ADD):
             # "Play next" / "Add to queue": only items of the device's lists.
             if not browse.is_our_id(media_id):
@@ -211,8 +232,14 @@ def apply() -> None:
             kind = "play_next" if enqueue == MediaPlayerEnqueue.NEXT else "add_to_queue"
             await browse.async_enqueue(self.coordinator.musiccast, self._zone_id, media_id, kind)
             return None
-        if provider := url_playback.provider_for(self.hass, media_id):
+        if provider:
             info = await provider(self.hass, media_id)
+            mode = url_queue.click_mode(self)
+            if info and info.get("duration") and enqueue is None and mode != "play":
+                # A click in the media browser while the click mode queues.
+                entry = {"media_id": media_id, "title": info["title"], "thumbnail": None}
+                await url_queue.async_enqueue(self, [entry], mode)
+                return None
             if info:
                 try:
                     await url_playback.async_play(self, media_id, info)
@@ -321,6 +348,8 @@ def apply() -> None:
         rec = url_playback.is_current(self)
         if rec and rec["seekable"]:
             features |= MediaPlayerEntityFeature.SEEK
+        if url_queue.has_next(self):
+            features |= MediaPlayerEntityFeature.NEXT_TRACK
         if _cd(self):
             features |= CD_FEATURES
         return features
@@ -335,6 +364,15 @@ def apply() -> None:
     cls.state = property(state)
     for name, playback in CD_TRANSPORT.items():
         setattr(cls, name, _cd_transport(name, playback))
+    cd_next = cls.async_media_next_track
+
+    async def async_media_next_track(self) -> None:
+        # Next on a pushed item goes on with the queue kept in Home Assistant.
+        if url_queue.has_next(self) and await url_queue.async_play_next(self):
+            return
+        await cd_next(self)
+
+    cls.async_media_next_track = async_media_next_track
     cd_info = {
         "media_title": lambda ext, cd: cd.get("track") or None,
         "media_artist": lambda ext, cd: cd.get("artist") or None,

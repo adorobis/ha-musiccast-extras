@@ -60,6 +60,10 @@ _REL_TIME = re.compile(r"<RelTime>(\d+:\d+:\d+)")
 resume: dict[str, dict[str, Any]] = {}
 on_resume_changed: Callable[[], None] | None = None
 _tracked: set[str] = set()
+_pushing: set[str] = set()  # hosts a new item is being pushed to
+# Called when a pushed item played to its end (url_queue plays the next one).
+on_ended: Callable[[MusicCastMediaPlayer], None] | None = None
+END_MARGIN = 20  # seconds; a stop this close to the duration is the end
 
 
 def _host(entity: MusicCastMediaPlayer) -> str:
@@ -163,6 +167,17 @@ async def async_play(
     entity: MusicCastMediaPlayer, media_id: str, info: dict[str, Any], position: float = 0
 ) -> None:
     """Push a media-source item with metadata, optionally from a position."""
+    host = _host(entity)
+    _pushing.add(host)  # the Stop of the old item is no "end of episode"
+    try:
+        await _async_play(entity, media_id, info, position)
+    finally:
+        _pushing.discard(host)
+
+
+async def _async_play(
+    entity: MusicCastMediaPlayer, media_id: str, info: dict[str, Any], position: float
+) -> None:
     hass = entity.hass
     play_item = await media_source.async_resolve_media(hass, media_id, entity.entity_id)
     url = async_process_play_media_url(hass, play_item.url)
@@ -273,6 +288,7 @@ def _track(entity: MusicCastMediaPlayer) -> None:
 
     @callback
     def _on_change(event: Event[EventStateChangedData]) -> None:
+        _check_ended(entity)
         rec = is_current(entity)
         if rec is None:
             return
@@ -291,6 +307,24 @@ def _track(entity: MusicCastMediaPlayer) -> None:
             _changed()
 
     async_track_state_change_event(entity.hass, entity.entity_id, _on_change)
+
+
+def _check_ended(entity: MusicCastMediaPlayer) -> None:
+    """Report a pushed item that stopped at (or near) its end, once."""
+    rec = record(entity)
+    if (
+        rec is None
+        or on_ended is None
+        or _host(entity) in _pushing
+        or rec.get("ended")
+        or entity.coordinator.data.netusb_playback != "stop"
+        or not rec.get("duration")
+        or rec["position"] < rec["duration"] - END_MARGIN
+    ):
+        return
+    rec["ended"] = True
+    _changed()
+    on_ended(entity)
 
 
 async def _speaker_play_info(entity: MusicCastMediaPlayer) -> dict[str, Any]:

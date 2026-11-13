@@ -12,6 +12,8 @@ integration:
 - **Title, artist, cover, duration and seeking** for media pushed from Home Assistant
   media sources that provide metadata (e.g. [Radio Nowy Świat](https://github.com/adorobis/ha-nowyswiat)).
 - **Resume after a Home Assistant restart** for such media.
+- **A queue for such media** (e.g. podcast episodes): Play next / Add to queue, and the next
+  episode starts when one ends.
 - **The device's own lists in the media browser**: play queue, recently played, MusicCast playlists,
   tuner presets.
 - **Play next / Add to queue** for tracks and folders from the device's sources, right in the media
@@ -166,8 +168,29 @@ data:
   enqueue: next   # or: add
 ```
 
-Items that are not from the device's own sources (e.g. media sources) can only be played, not
-queued.
+For items of media sources, see the next section.
+
+### A queue for podcasts and other media-source items
+
+The device's play queue only takes items of its own lists. Items from Home Assistant media sources
+(for example the episodes of [Radio Nowy Świat](https://github.com/adorobis/ha-nowyswiat) or
+[Radio 357](https://github.com/adorobis/ha-radio357)) are pushed to the speaker one at a time, so
+MusicCast Extras keeps a queue for them in Home Assistant, per speaker:
+
+- Folders of a media source with metadata get the same entries on top as the device's lists:
+  **Click: …**, **⏭ Play this folder next**, **➕ Add this folder to the queue**, and
+  **📋 Queue (N)** once something is queued. Live streams can't be queued (they never end), and
+  items your account can't play are skipped.
+- When an episode **plays to its end**, the next one starts (with a gap of a second or two). A
+  stop in the middle of an episode does not move on. **Next** on the player card skips to the
+  next queued item.
+- If nothing of the queue is playing, adding to it starts playing right away.
+- **📋 Queue**: click an item to play from there (the items before it are dropped), or
+  **🗑 Clear the queue**. The queue survives a Home Assistant restart.
+- `media_player.play_media` with `enqueue: next` / `add` and a media-source item ID queues it.
+
+Which items qualify is decided by the media source: it must register a metadata provider (see
+[For developers](#for-developers)), since the end of an item is told by its duration.
 
 ### Known limits
 
@@ -275,6 +298,10 @@ Dodatki do wbudowanej integracji Yamaha MusicCast:
 - **Odtwórz następne / Dodaj do kolejki** dla utworów i folderów ze źródeł urządzenia: wpisy na
   górze folderu („⏭ Play this folder next”, „➕ Add this folder to the queue”) oraz przełącznik
   „Click: …”, który zmienia działanie kliknięcia utworu (odtwórz / następny / do kolejki).
+- **Kolejka dla podcastów** i innych pozycji ze źródeł mediów z metadanymi (np. Radio Nowy Świat,
+  Radio 357): te same wpisy na górze folderów z odcinkami oraz „📋 Queue”. Kolejka jest trzymana w
+  HA dla każdego głośnika. Gdy odcinek dojdzie do końca, startuje następny, a przycisk „Następny”
+  przeskakuje do kolejnej pozycji. Kolejka przetrwa restart HA.
 - **Sterowanie CD**: odtwarzanie, pauza, stop, przewijanie utworów i informacje o płycie.
 - **Encje dla funkcji obsługiwanych przez urządzenie**: parametry sygnału (osobno format,
   częstotliwość, rozdzielczość, przepływność), sygnał Wi-Fi, stacja tunera i tekst RDS/DAB, budzik,
