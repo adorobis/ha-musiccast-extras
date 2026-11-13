@@ -14,7 +14,8 @@ integration:
 - **Resume after a Home Assistant restart** for such media.
 - **The device's own lists in the media browser**: play queue, recently played, MusicCast playlists,
   tuner presets.
-- **Play next / Add to queue** for tracks and folders from the device's sources.
+- **Play next / Add to queue** for tracks and folders from the device's sources, right in the media
+  browser.
 - **CD control**: play, pause, stop, skip and track info when a zone plays the CD.
 - **Entities for what each device supports**: signal info, Wi-Fi signal, tuner station and
   RDS/DAB text, alarm, scenes, balance, volume in dB, Surround:AI, Auro-3D, HDMI outputs,
@@ -139,10 +140,21 @@ Extras once they are back (or after adding a MusicCast device).
 
 ### Play next / Add to queue
 
-MusicCast players support Home Assistant's queue options, so the media browser offers **Play**,
-**Play next** and **Add to queue** for tracks and whole folders (albums, playlists, …) of every
-list source (Server, Tidal, net radio, …), like the MusicCast app (`netusb/manageList` with
-`play_next` / `add_to_queue`). The same works from automations:
+Home Assistant's media browser only *plays* what you click; it has no Play next / Add to queue
+menu. So every list with tracks (an album, a playlist, a folder on a media server, …) of the
+device's list sources gets extra entries at the top:
+
+- **Click: ▶ Play now (tap to change)**: tap it to switch what clicking a track does, cycling
+  through **▶ Play now**, **⏭ Play next** and **➕ Add to queue**. The mode is remembered per
+  player (until Home Assistant restarts), so you can add several tracks in a row.
+- **⏭ Play this folder next** and **➕ Add this folder to the queue**: queue the whole album or
+  playlist.
+
+Behind it is the call the MusicCast app uses (`netusb/manageList` with `play_next` /
+`add_to_queue`). The **Play queue** folder shows the result.
+
+The same is available to automations and scripts through `media_player.play_media` with
+`enqueue`, using an item ID from the media browser:
 
 ```yaml
 action: media_player.play_media
@@ -260,7 +272,9 @@ Dodatki do wbudowanej integracji Yamaha MusicCast:
 - **Wznawianie po restarcie Home Assistant**: od razu, od bieżącego miejsca.
 - **Własne listy urządzenia w przeglądarce mediów**: kolejka odtwarzania, ostatnio odtwarzane,
   playlisty MusicCast, zapisane stacje tunera.
-- **Odtwórz następne / Dodaj do kolejki** dla utworów i folderów ze źródeł urządzenia.
+- **Odtwórz następne / Dodaj do kolejki** dla utworów i folderów ze źródeł urządzenia: wpisy na
+  górze folderu („⏭ Play this folder next”, „➕ Add this folder to the queue”) oraz przełącznik
+  „Click: …”, który zmienia działanie kliknięcia utworu (odtwórz / następny / do kolejki).
 - **Sterowanie CD**: odtwarzanie, pauza, stop, przewijanie utworów i informacje o płycie.
 - **Encje dla funkcji obsługiwanych przez urządzenie**: parametry sygnału (osobno format,
   częstotliwość, rozdzielczość, przepływność), sygnał Wi-Fi, stacja tunera i tekst RDS/DAB, budzik,

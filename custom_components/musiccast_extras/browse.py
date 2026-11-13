@@ -105,6 +105,19 @@ def last_alias_id(source: str) -> str:
 
 LIBRARY_ID = f"{PREFIX}:library"  # the player's normal top level
 
+# The HA media browser only "plays" an item, it has no Play next / Add to
+# queue menu. So each list with tracks gets entries for that: the folder as
+# a whole, and a click mode (per player) that clicking a track follows.
+CLICK_MODES = ("play", "play_next", "add_to_queue")
+CLICK_MODE_LABELS = {
+    "play": "▶ Play now",
+    "play_next": "⏭ Play next",
+    "add_to_queue": "➕ Add to queue",
+}
+MODE_PREFIX = f"{PREFIX}:@mode:"  # + <mode>:<quoted list id>, opens that list
+FOLDER_QUEUE_PREFIX = f"{PREFIX}:@queue:"  # + <kind>:<quoted folder id>, playable
+click_mode: dict[str, str] = {}  # player host -> mode
+
 
 def nav_item(title: str, media_id: str, thumbnail: str | None = None) -> BrowseMedia:
     return BrowseMedia(
@@ -427,8 +440,54 @@ def _search_entry_index(entries: list[dict]) -> int | None:
     return None
 
 
+def _queue_entries(
+    musiccast: Any,
+    source: str,
+    path: tuple[Step, ...],
+    start: int,
+    query: str | None,
+    entries: list[dict],
+) -> list[BrowseMedia]:
+    """Return the click-mode switch and the folder queue entries for a list."""
+    flags = [_attrs(e) for e in entries]
+    has_tracks = any(can_play and not can_expand for can_expand, can_play, _ in flags)
+    if not path or not any(can_play for _, can_play, _ in flags):
+        return []
+    list_id = make_id(source, path, start, query)
+    mode = click_mode.get(player_host(musiccast), "play")
+    following = CLICK_MODES[(CLICK_MODES.index(mode) + 1) % len(CLICK_MODES)]
+    result = [
+        nav_item(
+            f"Click: {CLICK_MODE_LABELS[mode]} (tap to change)",
+            f"{MODE_PREFIX}{following}:{quote(list_id, safe='')}",
+        )
+    ]
+    if has_tracks and not isinstance(path[-1], str):
+        folder_id = quote(make_id(source, path, 0, query), safe="")
+        result += [
+            BrowseMedia(
+                title=title,
+                media_class=MediaClass.PLAYLIST,
+                media_content_id=f"{FOLDER_QUEUE_PREFIX}{kind}:{folder_id}",
+                media_content_type="music",
+                can_play=True,
+                can_expand=False,
+            )
+            for kind, title in (
+                ("play_next", "⏭ Play this folder next"),
+                ("add_to_queue", "➕ Add this folder to the queue"),
+            )
+        ]
+    return result
+
+
 async def async_browse(musiccast: Any, zone_id: str, media_id: str) -> BrowseMedia:
     """Browse the list at the path in ``media_id``."""
+    if media_id.startswith(MODE_PREFIX):
+        mode, _, list_id = media_id[len(MODE_PREFIX) :].partition(":")
+        if mode in CLICK_MODES:
+            click_mode[player_host(musiccast)] = mode
+        return await async_browse(musiccast, zone_id, unquote(list_id))
     parts = media_id.split(":")
     if len(parts) >= 3 and parts[2] == LAST_ALIAS:
         last = last_played.get(player_host(musiccast))
@@ -477,6 +536,7 @@ async def async_browse(musiccast: Any, zone_id: str, media_id: str) -> BrowseMed
         )
     if not path and not start and (resume := resume_item(musiccast)):
         nav_entries.append(resume)
+    nav_entries += _queue_entries(musiccast, source, path, start, query, entries)
     children = [*nav_entries, *children]
     if start + len(entries) < max_line:
         children.append(
@@ -555,7 +615,15 @@ async def async_search(
 
 
 async def async_play(musiccast: Any, zone_id: str, media_id: str) -> None:
-    """Play the item at the path in ``media_id``."""
+    """Play the item at the path in ``media_id`` (or queue it, see click_mode)."""
+    if media_id.startswith(FOLDER_QUEUE_PREFIX):
+        kind, _, folder_id = media_id[len(FOLDER_QUEUE_PREFIX) :].partition(":")
+        await async_enqueue(musiccast, zone_id, unquote(folder_id), kind)
+        return
+    mode = click_mode.get(player_host(musiccast), "play")
+    if mode != "play":
+        await async_enqueue(musiccast, zone_id, media_id, mode)
+        return
     source, path, _start, query = parse_id(media_id)
     if not path or isinstance(path[-1], str):
         raise HomeAssistantError("Nothing to play here")
