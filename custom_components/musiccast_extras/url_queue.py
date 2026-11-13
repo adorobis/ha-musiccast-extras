@@ -116,10 +116,24 @@ def decorate(entity: MusicCastMediaPlayer, folder: BrowseMedia) -> BrowseMedia:
             )
         ),
     ]
-    if queue := queues.get(host):
-        entries.append(browse.nav_item(f"📋 Queue ({len(queue)})", LIST_ID))
+    if queues.get(host):
+        entries.append(root_entry(entity))
     folder.children = [*entries, *children]
     return folder
+
+
+def _title(entity: MusicCastMediaPlayer) -> str:
+    return f"📋 Media queue ({len(queues.get(_host(entity), []))})"
+
+
+def root_entry(entity: MusicCastMediaPlayer) -> BrowseMedia:
+    """Return the entry that opens the queue."""
+    return browse.nav_item(_title(entity), LIST_ID)
+
+
+def show_at_root(entity: MusicCastMediaPlayer) -> bool:
+    """Return True if the player's top level should list the queue."""
+    return bool(queues.get(_host(entity))) or url_playback.is_current(entity) is not None
 
 
 def set_mode(entity: MusicCastMediaPlayer, media_id: str) -> str | None:
@@ -139,7 +153,7 @@ def browse_queue(entity: MusicCastMediaPlayer, media_id: str) -> BrowseMedia:
         raise HomeAssistantError(f"Unknown queue folder {media_id}")
     queue = queues.get(host, [])
     folder = BrowseMedia(
-        title=f"Queue ({len(queue)})",
+        title=_title(entity),
         media_class=MediaClass.PLAYLIST,
         media_content_id=LIST_ID,
         media_content_type="music",
@@ -147,7 +161,19 @@ def browse_queue(entity: MusicCastMediaPlayer, media_id: str) -> BrowseMedia:
         can_expand=True,
         children_media_class=MediaClass.TRACK,
     )
-    folder.children = [
+    folder.children = []
+    if rec := url_playback.is_current(entity):
+        folder.children.append(
+            BrowseMedia(
+                title=f"▶ Now: {rec['title']}",
+                media_class=MediaClass.TRACK,
+                media_content_id=f"{PREFIX}:now",
+                media_content_type="music",
+                can_play=False,
+                can_expand=False,
+            )
+        )
+    folder.children += [
         BrowseMedia(
             title=f"{n}. {entry['title']}",
             media_class=MediaClass.TRACK,
@@ -159,7 +185,11 @@ def browse_queue(entity: MusicCastMediaPlayer, media_id: str) -> BrowseMedia:
         )
         for n, entry in enumerate(queue, 1)
     ]
-    if queue:
+    if not queue:
+        folder.children.append(
+            browse.nav_item("(empty: use ➕ at the top of a podcast folder)", LIST_ID)
+        )
+    else:
         folder.children.append(
             BrowseMedia(
                 title="🗑 Clear the queue",
@@ -225,6 +255,7 @@ async def async_play(entity: MusicCastMediaPlayer, media_id: str) -> None:
     host = _host(entity)
     queue = queues.setdefault(host, [])
     if media_id == CLEAR_ID:
+        _LOGGER.info("%s: queue cleared (%d item(s))", entity.entity_id, len(queue))
         queue.clear()
         _changed()
         return
@@ -232,6 +263,9 @@ async def async_play(entity: MusicCastMediaPlayer, media_id: str) -> None:
         index = int(media_id.rsplit(":", 1)[1])
         if not 0 <= index < len(queue):
             raise HomeAssistantError("The queue has changed, open it again")
+        _LOGGER.info(
+            "%s: playing queue item %d, dropping %d before it", entity.entity_id, index + 1, index
+        )
         del queue[:index]
         _changed()
         await async_play_next(entity)
@@ -256,6 +290,9 @@ async def async_play_next(entity: MusicCastMediaPlayer) -> bool:
         if not info:
             _LOGGER.warning("Skipping %s, it can't be played any more", entry["title"])
             continue
+        _LOGGER.info(
+            "%s: playing queued %s (%d left)", entity.entity_id, entry["title"], len(queue)
+        )
         await url_playback.async_play(entity, entry["media_id"], info)
         return True
     return False
@@ -269,6 +306,7 @@ def has_next(entity: MusicCastMediaPlayer) -> bool:
 def on_ended(entity: MusicCastMediaPlayer) -> None:
     """A pushed item played to its end: go on with the queue."""
     if not queues.get(_host(entity)):
+        _LOGGER.info("%s: item ended, the queue is empty", entity.entity_id)
         return
 
     async def _next() -> None:

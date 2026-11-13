@@ -323,6 +323,7 @@ def _check_ended(entity: MusicCastMediaPlayer) -> None:
     ):
         return
     rec["ended"] = True
+    _LOGGER.info("%s ended on %s at %ss", rec["title"], entity.entity_id, int(rec["position"]))
     _changed()
     on_ended(entity)
 

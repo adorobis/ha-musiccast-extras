@@ -15,5 +15,5 @@
   "issue_tracker": "https://github.com/adorobis/ha-musiccast-extras/issues",
   "requirements": [],
   "single_config_entry": true,
-  "version": "1.7.0"
+  "version": "1.7.1"
 }

@@ -179,14 +179,17 @@ MusicCast Extras keeps a queue for them in Home Assistant, per speaker:
 
 - Folders of a media source with metadata get the same entries on top as the device's lists:
   **Click: …**, **⏭ Play this folder next**, **➕ Add this folder to the queue**, and
-  **📋 Queue (N)** once something is queued. Live streams can't be queued (they never end), and
+  **📋 Media queue (N)** once something is queued. Live streams can't be queued (they never end), and
   items your account can't play are skipped.
 - When an episode **plays to its end**, the next one starts (with a gap of a second or two). A
   stop in the middle of an episode does not move on. **Next** on the player card skips to the
   next queued item.
 - If nothing of the queue is playing, adding to it starts playing right away.
-- **📋 Queue**: click an item to play from there (the items before it are dropped), or
-  **🗑 Clear the queue**. The queue survives a Home Assistant restart.
+- **📋 Media queue** is also at the top of the player's media browser (next to the device's own
+  *Play queue*) while something is queued or a pushed item plays; the browser then opens there
+  instead of in the last played list. It shows what plays now (▶) and what comes next. Click an
+  item to play from there (the items before it are dropped), or **🗑 Clear the queue**. The queue
+  survives a Home Assistant restart.
 - `media_player.play_media` with `enqueue: next` / `add` and a media-source item ID queues it.
 
 Which items qualify is decided by the media source: it must register a metadata provider (see
@@ -299,7 +302,8 @@ Dodatki do wbudowanej integracji Yamaha MusicCast:
   górze folderu („⏭ Play this folder next”, „➕ Add this folder to the queue”) oraz przełącznik
   „Click: …”, który zmienia działanie kliknięcia utworu (odtwórz / następny / do kolejki).
 - **Kolejka dla podcastów** i innych pozycji ze źródeł mediów z metadanymi (np. Radio Nowy Świat,
-  Radio 357): te same wpisy na górze folderów z odcinkami oraz „📋 Queue”. Kolejka jest trzymana w
+  Radio 357): te same wpisy na górze folderów z odcinkami oraz „📋 Media queue”, widoczne też na
+  najwyższym poziomie przeglądarki mediów odtwarzacza (co gra teraz i co dalej). Kolejka jest trzymana w
   HA dla każdego głośnika. Gdy odcinek dojdzie do końca, startuje następny, a przycisk „Następny”
   przeskakuje do kolejnej pozycji. Kolejka przetrwa restart HA.
 - **Sterowanie CD**: odtwarzanie, pauza, stop, przewijanie utworów i informacje o płycie.

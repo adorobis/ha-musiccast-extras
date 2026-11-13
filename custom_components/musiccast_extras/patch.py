@@ -179,6 +179,7 @@ def apply() -> None:
             not media_content_id
             and self.state != MediaPlayerState.OFF
             and self.source_id in PATH_INPUTS
+            and url_playback.is_current(self) is None  # a pushed item: show the queue
         ):
             # Start where we left off while the player is still on that source.
             try:
@@ -197,9 +198,12 @@ def apply() -> None:
             return await library.async_browse(ext, media_content_id)
         if our_id is None:
             result = await orig_browse(self, media_content_type, media_content_id)
-            if not media_content_id and result.children is not None and (ext := _extras(self)):
-                # The device's own lists, next to the inputs.
-                result.children = [*library.root_folders(ext), *result.children]
+            if not media_content_id and result.children is not None:
+                # The queue of pushed items and the device's own lists, next to the inputs.
+                own = library.root_folders(ext) if (ext := _extras(self)) else []
+                if url_queue.show_at_root(self):
+                    own.insert(0, url_queue.root_entry(self))
+                result.children = [*own, *result.children]
             if media_content_id and media_source.is_media_source_id(media_content_id):
                 result = url_queue.decorate(self, result)
             return result
