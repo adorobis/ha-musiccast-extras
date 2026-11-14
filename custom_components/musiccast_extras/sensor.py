@@ -1,10 +1,14 @@
-"""Sensors: signal info (one per parameter), Wi-Fi signal, tuner, alarms."""
+"""Sensors: signal info (one per parameter), network, Wi-Fi signal, tuner, alarms."""
 
 from __future__ import annotations
 
 from typing import Any
 
-from homeassistant.components.sensor import SensorEntity, SensorStateClass
+from homeassistant.components.sensor import (
+    SensorDeviceClass,
+    SensorEntity,
+    SensorStateClass,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import PERCENTAGE, EntityCategory, UnitOfDataRate
 from homeassistant.core import HomeAssistant
@@ -30,6 +34,15 @@ SIGNAL_ERRORS = {
     5: "over_fs",
 }
 UNKNOWN = ("", "---")
+# getNetworkStatus "connection" values (YXC spec).
+CONNECTIONS = [
+    "wired_lan",
+    "wireless_lan",
+    "wireless_direct",
+    "extend_1",
+    "extend_2",
+    "extend_3",
+]
 DAYS = ("sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday")
 
 
@@ -44,6 +57,12 @@ async def async_setup_entry(
                 if api_key in device.zone_signal(zone_id):
                     entities.append(SignalSensor(device, zone_id, api_key, key))
         network = (device.data or {}).get("network", {})
+        if network.get("ip_address"):
+            entities.append(IpAddressSensor(device))
+        if network.get("connection"):
+            entities.append(ConnectionSensor(device))
+        if network.get("mac_address"):
+            entities.append(MacAddressSensor(device))
         if network.get("connection") == "wireless_lan" and "strength" in network.get(
             "wireless_lan", {}
         ):
@@ -82,6 +101,91 @@ class SignalSensor(MusicCastExtrasEntity, SensorEntity):
         if self._api_key == "bitrate":
             return value or None
         return None if value in UNKNOWN or value is None else value
+
+
+class IpAddressSensor(MusicCastExtrasEntity, SensorEntity):
+    """The device's IP address, with the rest of its network settings."""
+
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_icon = "mdi:ip-network"
+
+    def __init__(self, device: MusicCastExtrasDevice) -> None:
+        """Initialize."""
+        super().__init__(device, "ip_address")
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the IP address."""
+        return self.data.get("network", {}).get("ip_address") or None
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return DHCP, mask, gateway, DNS, IPv6, the web pages and the network name."""
+        network = self.data.get("network", {})
+        attrs = {
+            "dhcp": network.get("dhcp"),
+            "subnet_mask": network.get("subnet_mask"),
+            "default_gateway": network.get("default_gateway"),
+            "dns_server_1": network.get("dns_server_1"),
+            "dns_server_2": network.get("dns_server_2"),
+            "ipv6": (network.get("ipv6") or {}).get("address"),
+            "web_settings": f"http://{self.device.ip_address}/",
+            "web_setup": (
+                f"http://{self.device.ip_address}{self.device.web_path}"
+                if self.device.web_path != "/"
+                else None
+            ),
+            "network_name": network.get("network_name"),
+        }
+        return {k: v for k, v in attrs.items() if v not in (None, "")}
+
+
+class ConnectionSensor(MusicCastExtrasEntity, SensorEntity):
+    """How the device is connected: wired, Wi-Fi, wireless direct, extender."""
+
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_device_class = SensorDeviceClass.ENUM
+    _attr_options = CONNECTIONS
+    _attr_icon = "mdi:lan-connect"
+
+    def __init__(self, device: MusicCastExtrasDevice) -> None:
+        """Initialize."""
+        super().__init__(device, "connection")
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the connection type."""
+        value = self.data.get("network", {}).get("connection")
+        return value if value in CONNECTIONS else None
+
+
+class MacAddressSensor(MusicCastExtrasEntity, SensorEntity):
+    """MAC address of the interface in use (disabled by default)."""
+
+    _attr_entity_category = EntityCategory.DIAGNOSTIC
+    _attr_entity_registry_enabled_default = False
+    _attr_icon = "mdi:network-outline"
+
+    def __init__(self, device: MusicCastExtrasDevice) -> None:
+        """Initialize."""
+        super().__init__(device, "mac_address")
+
+    @property
+    def native_value(self) -> str | None:
+        """Return the MAC of the current connection, formatted aa:bb:..."""
+        network = self.data.get("network", {})
+        macs = network.get("mac_address") or {}
+        connection = network.get("connection", "")
+        mac = macs.get("wired_lan" if connection.startswith("extend") else connection)
+        if not mac:
+            return None
+        mac = mac.strip().lower()
+        return ":".join(mac[i : i + 2] for i in range(0, len(mac), 2)) if len(mac) == 12 else mac
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the MACs of all interfaces."""
+        return dict(self.data.get("network", {}).get("mac_address") or {})
 
 
 class WifiSignalSensor(MusicCastExtrasEntity, SensorEntity):

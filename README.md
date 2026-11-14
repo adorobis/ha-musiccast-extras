@@ -21,7 +21,10 @@ integration:
 - **CD control**: play, pause, stop, skip and track info when a zone plays the CD.
 - **Entities for what each device supports**: signal info, Wi-Fi signal, tuner station and
   RDS/DAB text, alarm, scenes, balance, volume in dB, Surround:AI, Auro-3D, HDMI outputs,
-  speaker pattern, restart.
+  speaker pattern, restart, IP address, connection type, MAC address.
+- **"Visit" link** on each MusicCast device page, to the device's own web page: the advanced
+  "Web Setup" (`/Setup/`) where the device serves one (AV receivers), else the basic settings
+  page at its IP address. Checked per device when the integration starts.
 
 Everything is detected per device from what it reports (`system/getFeatures` and its
 status), not from a list of models: a device only gets the entities and folders it supports.
@@ -117,6 +120,9 @@ device), next to its own entities. Their entity IDs follow the device name, e.g.
 | Entity | Type | Created when the device reports | API |
 | --- | --- | --- | --- |
 | Audio format, Sample rate, Bit depth, Bitrate, Signal error | sensor (one per parameter, per zone) | `signal_info`; only the parameters the zone returns | `<zone>/getSignalInfo` |
+| IP address (attributes: DHCP, subnet mask, gateway, DNS, IPv6, `web_settings` and `web_setup` URLs, network name) | sensor, diagnostic | always | `system/getNetworkStatus` |
+| Connection (wired, Wi-Fi, Wireless Direct, MusicCast extend) | sensor, diagnostic | always | `system/getNetworkStatus` |
+| MAC address (of the interface in use; all MACs as attributes) | sensor, diagnostic, disabled by default | always | `system/getNetworkStatus` |
 | Wi-Fi signal (%, with SSID and channel attributes) | sensor | a Wi-Fi connection | `system/getNetworkStatus` |
 | Tuner band, Tuner station, Tuner text (RDS radio text / DAB DLS; station attributes: ensemble, bit rate, quality) | sensor | a tuner (`fm`/`am`/`dab`, text with `rds`/`dab`) | `tuner/getPlayInfo` |
 | Scene 1 … *n* | button (per zone) | `scene`, `scene_num` | `<zone>/recallScene` |
@@ -310,7 +316,10 @@ Dodatki do wbudowanej integracji Yamaha MusicCast:
 - **Encje dla funkcji obsługiwanych przez urządzenie**: parametry sygnału (osobno format,
   częstotliwość, rozdzielczość, przepływność), sygnał Wi-Fi, stacja tunera i tekst RDS/DAB, budzik,
   sceny, balans, głośność w dB, Surround:AI, Auro-3D, wyjścia HDMI, konfiguracja głośników,
-  przyciski restartu.
+  przyciski restartu, adres IP, rodzaj połączenia, adres MAC.
+- **Link „Odwiedź”** na stronie każdego urządzenia MusicCast, do jego strony WWW: zaawansowane
+  „Web Setup” (`/Setup/`), jeśli urządzenie ją ma (amplitunery AV), w przeciwnym razie podstawowe
+  ustawienia pod adresem IP. Sprawdzane osobno dla każdego urządzenia przy starcie integracji.
 
 Wszystko jest wykrywane osobno dla każdego urządzenia, na podstawie tego, co ono zgłasza, a nie z
 listy modeli.

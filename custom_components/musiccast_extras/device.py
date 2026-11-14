@@ -17,12 +17,15 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from datetime import timedelta
 import logging
+import re
 from typing import Any
 
+import aiohttp
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers import device_registry as dr
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
@@ -36,6 +39,13 @@ POLL_INTERVAL = timedelta(seconds=60)
 EVENT_COOLDOWN = 5  # seconds between refreshes caused by device events
 MUSICCAST_DOMAIN = "yamaha_musiccast"
 MAIN_ZONE = "main"
+# The "Visit" link (a device has only one): the advanced "Web Setup" of AV
+# receivers if the device serves it, else the basic "Web Settings" /
+# "System Configuration" page every MusicCast device has at its root.
+WEB_PAGES = ("/Setup/",)
+WEB_PROBE_TIMEOUT = 5  # seconds
+# A configuration URL this integration set (so it may update it).
+OWN_URL = re.compile(r"http://[0-9.]+(/Setup)?/")
 
 
 # host -> device, for the media player patch (filled while the entry is loaded)
@@ -107,6 +117,8 @@ class MusicCastExtrasDevice(DataUpdateCoordinator[dict[str, Any]]):
         self.device_id: str = core_coordinator.data.device_id
         self.model: str = core_coordinator.data.model_name
         self._unsub_event: Any = None
+        self._unsub_url: Any = None
+        self.web_path = "/"
         super().__init__(
             hass,
             _LOGGER,
@@ -193,6 +205,8 @@ class MusicCastExtrasDevice(DataUpdateCoordinator[dict[str, Any]]):
 
         self.musiccast.register_callback(_on_event)
         self._unsub_event = _on_event
+        self.async_update_configuration_url()
+        self._unsub_url = self.async_add_listener(self.async_update_configuration_url)
 
     @callback
     def async_stop_events(self) -> None:
@@ -200,6 +214,48 @@ class MusicCastExtrasDevice(DataUpdateCoordinator[dict[str, Any]]):
         if self._unsub_event is not None:
             self.musiccast.remove_callback(self._unsub_event)
             self._unsub_event = None
+        if self._unsub_url is not None:
+            self._unsub_url()
+            self._unsub_url = None
+
+    async def async_find_web_page(self) -> None:
+        """Pick the device's web page: the first of WEB_PAGES it serves, else "/"."""
+        session = async_get_clientsession(self.hass)
+        for path in WEB_PAGES:
+            try:
+                async with session.get(
+                    f"http://{self.host}{path}",
+                    allow_redirects=False,
+                    timeout=aiohttp.ClientTimeout(total=WEB_PROBE_TIMEOUT),
+                ) as resp:
+                    if resp.status == 200:
+                        self.web_path = path
+                        return
+            except Exception as err:  # any failure means "not there"
+                _LOGGER.debug("%s: no %s (%s)", self.host, path, err)
+
+    @property
+    def ip_address(self) -> str:
+        """Return the IP address the device reports, else the one used to reach it."""
+        return (self.data or {}).get("network", {}).get("ip_address") or self.host
+
+    @callback
+    def async_update_configuration_url(self) -> None:
+        """Point the "Visit" link of the core devices at the device's web page.
+
+        The core integration sets no configuration URL. A URL someone else
+        set is left alone; ours follows IP address changes.
+        """
+        url = f"http://{self.ip_address}{self.web_path}"
+        dev_reg = dr.async_get(self.hass)
+        for zone_id in self.features.zones:
+            core_device = self.core_device_entry(zone_id)
+            if core_device is None or core_device.configuration_url == url:
+                continue
+            current = core_device.configuration_url
+            if current and not OWN_URL.fullmatch(current):
+                continue
+            dev_reg.async_update_device(core_device.id, configuration_url=url)
 
     # ------------------------------------------------------------ helpers
 
@@ -262,6 +318,7 @@ async def async_create_devices(
         if not device.last_update_success:
             _LOGGER.warning("Skipping %s: could not read its state", entry.title)
             continue
+        await device.async_find_web_page()
         device.async_start_events()
         devices[device.host] = device
     return devices

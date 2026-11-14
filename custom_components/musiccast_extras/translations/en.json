@@ -83,6 +83,23 @@
           "over_fs": "Over 384 kHz (USB DAC)"
         }
       },
+      "ip_address": {
+        "name": "IP address"
+      },
+      "connection": {
+        "name": "Connection",
+        "state": {
+          "wired_lan": "Wired (Ethernet)",
+          "wireless_lan": "Wi-Fi",
+          "wireless_direct": "Wireless Direct",
+          "extend_1": "MusicCast extend (1)",
+          "extend_2": "MusicCast extend (2)",
+          "extend_3": "MusicCast extend (3)"
+        }
+      },
+      "mac_address": {
+        "name": "MAC address"
+      },
       "wifi_signal": {
         "name": "Wi-Fi signal"
       },
