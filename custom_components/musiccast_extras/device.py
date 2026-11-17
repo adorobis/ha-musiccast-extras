@@ -37,6 +37,10 @@ _LOGGER = logging.getLogger(__name__)
 API = "http://{host}/YamahaExtendedControl/v1/"
 POLL_INTERVAL = timedelta(seconds=60)
 EVENT_COOLDOWN = 5  # seconds between refreshes caused by device events
+# The devices' web server sometimes misses a request (more often when other
+# clients poll it too): keep the last data through this many failed
+# refreshes in a row before marking the entities unavailable.
+TOLERATED_FAILURES = 3
 MUSICCAST_DOMAIN = "yamaha_musiccast"
 MAIN_ZONE = "main"
 # The "Visit" link (a device has only one): the advanced "Web Setup" of AV
@@ -119,6 +123,7 @@ class MusicCastExtrasDevice(DataUpdateCoordinator[dict[str, Any]]):
         self._unsub_event: Any = None
         self._unsub_url: Any = None
         self.web_path = "/"
+        self._failures = 0
         super().__init__(
             hass,
             _LOGGER,
@@ -191,7 +196,24 @@ class MusicCastExtrasDevice(DataUpdateCoordinator[dict[str, Any]]):
                 data["cd"] = await self.get("cd/getPlayInfo")
                 data["cd_updated"] = dt_util.utcnow()
         except Exception as err:
-            raise UpdateFailed(f"{self.model} ({self.host}): {err}") from err
+            reason = f"{type(err).__name__}: {err}".rstrip(": ")
+            self._failures += 1
+            if self.data and self._failures <= TOLERATED_FAILURES:
+                _LOGGER.debug(
+                    "%s (%s): refresh failed (%s), keeping the last data (%d/%d)",
+                    self.model,
+                    self.host,
+                    reason,
+                    self._failures,
+                    TOLERATED_FAILURES,
+                )
+                return self.data
+            raise UpdateFailed(
+                f"{self.model} ({self.host}): {reason} ({self._failures} refreshes in a row)"
+            ) from err
+        if self._failures:
+            _LOGGER.debug("%s (%s): refresh works again", self.model, self.host)
+        self._failures = 0
         return data
 
     @callback
