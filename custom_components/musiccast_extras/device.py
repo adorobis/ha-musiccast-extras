@@ -300,6 +300,52 @@ class MusicCastExtrasDevice(DataUpdateCoordinator[dict[str, Any]]):
         """Return the last getSignalInfo audio block of a zone."""
         return (self.data or {}).get("zones", {}).get(zone_id, {}).get("signal", {})
 
+    def playing_netusb_preset(self, zone_id: str) -> tuple[int, str | None]:
+        """Return the network/USB preset a zone plays now, (0, None) if none.
+
+        The device does not say which preset was recalled: the preset with
+        the zone's input whose name equals the station, album or track the
+        netusb module plays is taken, the lowest number if several match.
+        """
+        core = self.core.data
+        zone = core.zones.get(zone_id)
+        if zone is None or not zone.power:
+            return 0, None
+        source = zone.input
+        if (
+            source not in self.netusb_inputs
+            or core.netusb_input != source
+            or core.netusb_playback == "stop"
+        ):
+            return 0, None
+        playing = {core.netusb_artist, core.netusb_album, core.netusb_track} - {None, ""}
+        for number, (preset_input, text) in sorted(core.netusb_preset_list.items()):
+            if preset_input == source and text in playing:
+                return number, text
+        return 0, None
+
+    def netusb_preset_labels(self) -> dict[str, int]:
+        """Return label -> number of the stored network/USB presets.
+
+        The label is the preset's name; the input is added when one name is
+        stored for different inputs. A name stored twice for the same input
+        plays the same thing, so it is listed once (lowest number).
+        """
+        presets = sorted(self.core.data.netusb_preset_list.items())
+        inputs: dict[str, set[str]] = {}
+        for _, (preset_input, text) in presets:
+            inputs.setdefault(text, set()).add(preset_input)
+        names = self.core.data.input_names or {}
+        labels: dict[str, int] = {}
+        for number, (preset_input, text) in presets:
+            if not text:
+                continue
+            label = text
+            if len(inputs[text]) > 1:
+                label = f"{text} [{names.get(preset_input) or preset_input}]"
+            labels.setdefault(label, number)
+        return labels
+
     def core_device_entry(self, zone_id: str) -> dr.DeviceEntry | None:
         """Return the core integration's registered device for a zone."""
         identifier = self.core_device_identifier(zone_id)

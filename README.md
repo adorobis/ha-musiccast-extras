@@ -20,7 +20,7 @@ integration:
   browser.
 - **CD control**: play, pause, stop, skip and track info when a zone plays the CD.
 - **Entities for what each device supports**: signal info, Wi-Fi signal, tuner station and
-  RDS/DAB text, the preset playing now, alarm, scenes, balance, volume in dB, Surround:AI, Auro-3D, HDMI outputs,
+  RDS/DAB text, the preset playing now (by number or name, recalls the one you pick), alarm, scenes, balance, volume in dB, Surround:AI, Auro-3D, HDMI outputs,
   speaker pattern, restart, IP address, connection type, MAC address.
 - **"Visit" link** on each MusicCast device page, to the device's own web page: the advanced
   "Web Setup" (`/Setup/`) where the device serves one (AV receivers), else the basic settings
@@ -125,7 +125,8 @@ device), next to its own entities. Their entity IDs follow the device name, e.g.
 | MAC address (of the interface in use; all MACs as attributes) | sensor, diagnostic, disabled by default | always | `system/getNetworkStatus` |
 | Wi-Fi signal (%, with SSID and channel attributes) | sensor | a Wi-Fi connection | `system/getNetworkStatus` |
 | Tuner band, Tuner station, Tuner text (RDS radio text / DAB DLS; station attributes: ensemble, bit rate, quality) | sensor | a tuner (`fm`/`am`/`dab`, text with `rds`/`dab`) | `tuner/getPlayInfo` |
-| Preset (number of the preset the zone plays now, 0 if none; attribute `preset_name`). The device does not report which preset was recalled: for network sources (net radio, media server, streaming) the preset with the same input and the name of the station, album or track playing is taken, the lowest number if several match; for the tuner the device's own preset number | sensor (per zone) | network/USB inputs or a tuner | core integration's `netusb/getPlayInfo` and `getPresetInfo`, `tuner/getPlayInfo` |
+| Preset (number of the preset the zone plays now, 0 if none; attribute `preset_name`; setting a number recalls that preset: the tuner preset of the current band while the zone plays the tuner, else the network/USB preset, 0 does nothing). The device does not report which preset was recalled: for network sources (net radio, media server, streaming) the preset with the same input and the name of the station, album or track playing is taken, the lowest number if several match; for the tuner the device's own preset number | number (per zone, box) | network/USB inputs or a tuner | `netusb/recallPreset`, `tuner/recallPreset`; reads the core integration's play and preset info and `tuner/getPlayInfo` |
+| Preset name (the network/USB presets by name, as stored on the device; a name stored twice for one input is listed once; unknown while none plays; attribute `preset_number`; selecting one recalls it) | select (per zone) | network/USB inputs | `netusb/recallPreset` |
 | Scene 1 … *n* | button (per zone) | `scene`, `scene_num` | `<zone>/recallScene` |
 | Balance | number (per zone, device's range) | `balance` | `<zone>/setBalance` |
 | Volume (dB) | number (per zone, device's range) | `actual_volume` in dB mode | `<zone>/setActualVolume` |
@@ -315,7 +316,7 @@ Dodatki do wbudowanej integracji Yamaha MusicCast:
   przeskakuje do kolejnej pozycji. Kolejka przetrwa restart HA.
 - **Sterowanie CD**: odtwarzanie, pauza, stop, przewijanie utworów i informacje o płycie.
 - **Encje dla funkcji obsługiwanych przez urządzenie**: parametry sygnału (osobno format,
-  częstotliwość, rozdzielczość, przepływność), sygnał Wi-Fi, stacja tunera i tekst RDS/DAB, aktualnie grany preset (0, gdy nic nie pasuje), budzik,
+  częstotliwość, rozdzielczość, przepływność), sygnał Wi-Fi, stacja tunera i tekst RDS/DAB, aktualnie grany preset jako numer (0, gdy nic nie pasuje) i jako lista nazw – wybór wywołuje preset na urządzeniu, budzik,
   sceny, balans, głośność w dB, Surround:AI, Auro-3D, wyjścia HDMI, konfiguracja głośników,
   przyciski restartu, adres IP, rodzaj połączenia, adres MAC.
 - **Link „Odwiedź”** na stronie każdego urządzenia MusicCast, do jego strony WWW: zaawansowane

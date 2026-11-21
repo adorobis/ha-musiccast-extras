@@ -43,6 +43,9 @@
       },
       "alarm_volume": {
         "name": "Głośność budzika"
+      },
+      "preset": {
+        "name": "Preset"
       }
     },
     "select": {
@@ -57,6 +60,9 @@
       },
       "alarm_source": {
         "name": "Źródło budzika"
+      },
+      "preset_select": {
+        "name": "Nazwa presetu"
       }
     },
     "sensor": {
@@ -114,9 +120,6 @@
       },
       "multi_alarm": {
         "name": "Budzik {number}"
-      },
-      "preset": {
-        "name": "Preset"
       }
     },
     "switch": {

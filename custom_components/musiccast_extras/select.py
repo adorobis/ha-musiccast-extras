@@ -1,11 +1,14 @@
-"""Selects: Auro-3D modes, speaker pattern, alarm source."""
+"""Selects: Auro-3D modes, speaker pattern, alarm source, preset."""
 
 from __future__ import annotations
+
+from typing import Any
 
 from homeassistant.components.select import SelectEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from .device import MusicCastExtrasDevice
@@ -40,6 +43,8 @@ async def async_setup_entry(
         inputs = f.raw.get("clock", {}).get("alarm_input_list", [])
         if "oneday" in alarm and inputs:
             entities.append(AlarmSourceSelect(device, inputs))
+        if device.netusb_inputs:
+            entities += [PresetSelect(device, zone_id) for zone_id in f.zones]
     async_add_entities(entities)
 
 
@@ -120,3 +125,46 @@ class AlarmSourceSelect(MusicCastExtrasEntity, SelectEntity):
             "clock/setAlarmSettings",
             {"detail": {"day": "oneday", "playback_type": "resume", "resume": {"input": option}}},
         )
+
+
+class PresetSelect(MusicCastExtrasEntity, SelectEntity):
+    """The network/USB preset a zone plays now, by name; selecting one recalls it.
+
+    No option is selected (state unknown) while the zone plays none of the
+    presets. Recalling turns the zone on and selects the preset's input.
+    """
+
+    _attr_icon = "mdi:star-box-multiple-outline"
+
+    def __init__(self, device: MusicCastExtrasDevice, zone_id: str) -> None:
+        """Initialize."""
+        super().__init__(device, "preset_select", zone_id=zone_id)
+
+    @property
+    def options(self) -> list[str]:
+        """Return the names of the stored presets."""
+        return list(self.device.netusb_preset_labels())
+
+    @property
+    def current_option(self) -> str | None:
+        """Return the preset playing now."""
+        number, _ = self.device.playing_netusb_preset(self.zone_id)
+        if not number:
+            return None
+        # The match is the lowest number of its name and input, as listed.
+        return next(
+            (label for label, n in self.device.netusb_preset_labels().items() if n == number),
+            None,
+        )
+
+    @property
+    def extra_state_attributes(self) -> dict[str, Any]:
+        """Return the preset number playing now (0 if none)."""
+        return {"preset_number": self.device.playing_netusb_preset(self.zone_id)[0]}
+
+    async def async_select_option(self, option: str) -> None:
+        """Recall the preset."""
+        number = self.device.netusb_preset_labels().get(option)
+        if number is None:
+            raise ServiceValidationError(f"No preset named {option}")
+        await self.device.command(f"netusb/recallPreset?zone={self.zone_id}&num={number}")

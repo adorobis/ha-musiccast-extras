@@ -1,4 +1,4 @@
-"""Sensors: signal info (one per parameter), network, Wi-Fi signal, tuner, alarms, preset."""
+"""Sensors: signal info (one per parameter), network, Wi-Fi signal, tuner, alarms."""
 
 from __future__ import annotations
 
@@ -71,8 +71,6 @@ async def async_setup_entry(
             entities += [TunerSensor(device, key) for key in ("tuner_band", "tuner_station")]
             if device.features.tuner & {"rds", "dab"}:
                 entities.append(TunerSensor(device, "tuner_text"))
-        if device.netusb_inputs or device.features.tuner:
-            entities += [PresetSensor(device, zone_id) for zone_id in device.features.zones]
         clock = (device.data or {}).get("clock", {})
         for index, _ in enumerate(clock.get("multi_alarm", {}).get("settings", [])):
             entities.append(MultiAlarmSensor(device, index))
@@ -314,51 +312,3 @@ class MultiAlarmSensor(MusicCastExtrasEntity, SensorEntity):
             "snooze": setting.get("snooze"),
         }
 
-
-class PresetSensor(MusicCastExtrasEntity, SensorEntity):
-    """The preset a zone is playing now; 0 when it plays none (or is off).
-
-    The device does not say which preset was recalled. For the tuner it
-    reports the preset of the tuned station; for network sources (net
-    radio, server, streaming services) the preset whose input and name
-    match what the netusb module plays (station, album or track name) is
-    taken, the lowest number if several match.
-    """
-
-    _attr_icon = "mdi:star-box-outline"
-
-    def __init__(self, device: MusicCastExtrasDevice, zone_id: str) -> None:
-        """Initialize."""
-        super().__init__(device, "preset", zone_id=zone_id)
-
-    def _match(self) -> tuple[int, str | None]:
-        core = self.device.core.data
-        zone = core.zones.get(self.zone_id)
-        if zone is None or not zone.power:
-            return 0, None
-        source = zone.input
-        if source == "tuner":
-            tuner = self.data.get("tuner", {})
-            band = tuner.get("band") or ""
-            return (tuner.get(band) or {}).get("preset") or 0, None
-        if (
-            source not in self.device.netusb_inputs
-            or core.netusb_input != source
-            or core.netusb_playback == "stop"
-        ):
-            return 0, None
-        playing = {core.netusb_artist, core.netusb_album, core.netusb_track} - {None, ""}
-        for number, (preset_input, text) in sorted(core.netusb_preset_list.items()):
-            if preset_input == source and text in playing:
-                return number, text
-        return 0, None
-
-    @property
-    def native_value(self) -> int:
-        """Return the preset number, 0 if none matches."""
-        return self._match()[0]
-
-    @property
-    def extra_state_attributes(self) -> dict[str, Any]:
-        """Return the preset's name."""
-        return {"preset_name": self._match()[1]}
