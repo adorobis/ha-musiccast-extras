@@ -10,6 +10,7 @@ removing the integration undoes the changes.
 from __future__ import annotations
 
 import logging
+from collections.abc import Callable
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
@@ -106,16 +107,28 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     patch.apply()
     _LOGGER.info("MusicCast extras enabled (path browsing for %s)", patch.PATH_INPUTS)
 
+    unsub_started: Callable[[], None] | None = None
+
     @callback
     def _resume_after_restart(_event: Event | None = None) -> None:
+        # A once-listener removes itself when it fires; calling its unsubscribe
+        # afterwards (on unload) makes HA log "Unable to remove unknown job listener".
+        nonlocal unsub_started
+        unsub_started = None
         url_playback.async_resume_after_restart(hass)
+
+    @callback
+    def _cancel_resume_listener() -> None:
+        if unsub_started is not None:
+            unsub_started()
 
     if hass.is_running:
         _resume_after_restart()
     else:
-        entry.async_on_unload(
-            hass.bus.async_listen_once(EVENT_HOMEASSISTANT_STARTED, _resume_after_restart)
+        unsub_started = hass.bus.async_listen_once(
+            EVENT_HOMEASSISTANT_STARTED, _resume_after_restart
         )
+        entry.async_on_unload(_cancel_resume_listener)
     devices = await extras_device.async_create_devices(hass, entry)
     entry.runtime_data = devices
     _migrate_registry(hass, entry, devices)
