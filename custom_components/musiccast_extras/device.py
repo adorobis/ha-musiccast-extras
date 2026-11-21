@@ -71,6 +71,7 @@ class Features:
     tuner: set[str] = field(default_factory=set)
     clock: set[str] = field(default_factory=set)
     inputs: set[str] = field(default_factory=set)
+    netusb_inputs: set[str] = field(default_factory=set)
 
     @classmethod
     def parse(cls, raw: dict[str, Any]) -> Features:
@@ -84,6 +85,11 @@ class Features:
             tuner=set(raw.get("tuner", {}).get("func_list", [])),
             clock=set(raw.get("clock", {}).get("func_list", [])),
             inputs={i["id"] for i in system.get("input_list", [])},
+            netusb_inputs={
+                i["id"]
+                for i in system.get("input_list", [])
+                if i.get("play_info_type") == "netusb"
+            },
         )
 
     def zone(self, zone_id: str) -> dict[str, Any]:
@@ -255,6 +261,11 @@ class MusicCastExtrasDevice(DataUpdateCoordinator[dict[str, Any]]):
                         return
             except Exception as err:  # any failure means "not there"
                 _LOGGER.debug("%s: no %s (%s)", self.host, path, err)
+
+    @property
+    def netusb_inputs(self) -> set[str]:
+        """Return the inputs played by the network/USB module."""
+        return self.features.netusb_inputs
 
     @property
     def ip_address(self) -> str:

@@ -114,6 +114,9 @@
       },
       "multi_alarm": {
         "name": "Budzik {number}"
+      },
+      "preset": {
+        "name": "Preset"
       }
     },
     "switch": {
