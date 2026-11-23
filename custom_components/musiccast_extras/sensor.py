@@ -311,4 +311,3 @@ class MultiAlarmSensor(MusicCastExtrasEntity, SensorEntity):
             "beep": setting.get("beep"),
             "snooze": setting.get("snooze"),
         }
-

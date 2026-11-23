@@ -86,9 +86,7 @@ class Features:
             clock=set(raw.get("clock", {}).get("func_list", [])),
             inputs={i["id"] for i in system.get("input_list", [])},
             netusb_inputs={
-                i["id"]
-                for i in system.get("input_list", [])
-                if i.get("play_info_type") == "netusb"
+                i["id"] for i in system.get("input_list", []) if i.get("play_info_type") == "netusb"
             },
         )
 
