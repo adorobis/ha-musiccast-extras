@@ -9,8 +9,8 @@ removing the integration undoes the changes.
 
 from __future__ import annotations
 
-import logging
 from collections.abc import Callable
+import logging
 from typing import Any
 
 from homeassistant.config_entries import ConfigEntry
