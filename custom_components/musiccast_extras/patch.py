@@ -358,6 +358,12 @@ def apply() -> None:
             features |= CD_FEATURES
         return features
 
+    def extra_state_attributes(self):
+        # Lets automations that react to a power-on leave a resume alone.
+        return {"resuming": url_playback.resuming(self)}
+
+    orig["extra_state_attributes"] = cls.__dict__.get("extra_state_attributes")
+    cls.extra_state_attributes = property(extra_state_attributes)
     cls.async_browse_media = async_browse_media
     cls.async_play_media = async_play_media
     cls.async_search_media = async_search_media

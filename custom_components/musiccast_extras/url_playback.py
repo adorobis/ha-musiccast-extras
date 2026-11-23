@@ -18,7 +18,13 @@ module instead:
 - right after a Home Assistant restart, pushes such a stream again on
   speakers that still play it from their buffer (the connection to HA broke)
   at their live position, or that stopped recently without being stopped
-  by the listener, at the saved position.
+  by the listener, at the saved position;
+- when a speaker is switched off while it plays such a stream and switched
+  on again on the server input, pushes it again at the saved position. The
+  speaker's own auto-play can't do that (it doesn't keep pushed streams, it
+  replays its last browsed server item instead). While this runs the player
+  has the attribute ``resuming: true``, so automations reacting to the
+  power-on (e.g. recalling a preset) can leave it alone.
 """
 
 from __future__ import annotations
@@ -37,7 +43,8 @@ from homeassistant.components.media_player import (
     MediaPlayerState,
     async_process_play_media_url,
 )
-from homeassistant.core import Event, EventStateChangedData, callback
+from homeassistant.const import STATE_UNAVAILABLE
+from homeassistant.core import Event, EventStateChangedData, State, callback
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.event import async_track_state_change_event
 from homeassistant.util import dt as dt_util
@@ -50,6 +57,9 @@ _LOGGER = logging.getLogger(__name__)
 PROVIDERS_KEY = "media_info_providers"
 SERVER_INPUT = "server"
 ORPHAN_WINDOW = 600  # a stopped stream this recent counts as broken by the restart
+POWER_RESUME_WINDOW = 12 * 3600  # switched on again within this: resume what played
+POWER_ON_WAIT = 8  # seconds for a switched-on zone to report its input
+RESUMING_GRACE = 5  # seconds to keep "resuming" after the push
 RESUME_MIN_SECONDS = 10  # don't seek for a resume this close to the start
 SEEK_WAIT = 15  # seconds to wait for the renderer to start playing
 DLNA_FLAGS = "DLNA.ORG_OP=01;DLNA.ORG_FLAGS=01700000000000000000000000000000"
@@ -61,6 +71,7 @@ resume: dict[str, dict[str, Any]] = {}
 on_resume_changed: Callable[[], None] | None = None
 _tracked: set[str] = set()
 _pushing: set[str] = set()  # hosts a new item is being pushed to
+_resuming: set[str] = set()  # entity IDs resuming after being switched on
 # Called when a pushed item played to its end (url_queue plays the next one).
 on_ended: Callable[[MusicCastMediaPlayer], None] | None = None
 END_MARGIN = 20  # seconds; a stop this close to the duration is the end
@@ -96,6 +107,11 @@ def is_current(entity: MusicCastMediaPlayer) -> dict[str, Any] | None:
     if rec and entity.coordinator.data.netusb_track == rec["title"]:
         return rec
     return None
+
+
+def resuming(entity: MusicCastMediaPlayer) -> bool:
+    """Return whether the player is resuming a stream after being switched on."""
+    return entity.entity_id in _resuming
 
 
 def _hms(seconds: float) -> str:
@@ -294,6 +310,7 @@ def _track(entity: MusicCastMediaPlayer) -> None:
 
     @callback
     def _on_change(event: Event[EventStateChangedData]) -> None:
+        _check_power(entity, event.data["old_state"], event.data["new_state"])
         _check_ended(entity)
         rec = is_current(entity)
         if rec is None:
@@ -313,6 +330,71 @@ def _track(entity: MusicCastMediaPlayer) -> None:
             _changed()
 
     async_track_state_change_event(entity.hass, entity.entity_id, _on_change)
+
+
+def _check_power(entity: MusicCastMediaPlayer, old: State | None, new: State | None) -> None:
+    """Remember a stream switched off while playing; resume it when switched on.
+
+    The record is per device, but a receiver's zones share it, so the zone
+    that was switched off is the one that resumes.
+    """
+    if old is None or new is None or old.state == new.state:
+        return
+    rec = resume.get(_host(entity))
+    if rec is None:
+        return
+    if new.state == MediaPlayerState.OFF:
+        if (
+            old.state == MediaPlayerState.PLAYING
+            and old.attributes.get("media_title") == rec["title"]
+            and not rec.get("ended")
+        ):
+            rec["power_off"] = {"entity_id": entity.entity_id, "at": dt_util.utcnow().isoformat()}
+            _LOGGER.info("%s switched off while playing %s", entity.entity_id, rec["title"])
+            _changed()
+        return
+    if old.state != MediaPlayerState.OFF or new.state == STATE_UNAVAILABLE:
+        return
+    power_off = rec.pop("power_off", None)
+    if not power_off or power_off.get("entity_id") != entity.entity_id:
+        if power_off:
+            rec["power_off"] = power_off  # another zone of the receiver
+        return
+    _changed()
+    at = dt_util.parse_datetime(power_off.get("at", ""))
+    if not at or (dt_util.utcnow() - at).total_seconds() > POWER_RESUME_WINDOW:
+        return
+    _resuming.add(entity.entity_id)
+    entity.async_write_ha_state()
+    entity.hass.async_create_task(
+        _resume_after_power_on(entity), f"musiccast power-on resume {entity.entity_id}"
+    )
+
+
+async def _resume_after_power_on(entity: MusicCastMediaPlayer) -> None:
+    """Push the stream that played when the player was switched off."""
+    try:
+        for _ in range(POWER_ON_WAIT * 2):
+            if entity.source_id:
+                break
+            await asyncio.sleep(0.5)
+        if entity.source_id != SERVER_INPUT:
+            _LOGGER.info("%s switched on to %s, not resuming", entity.entity_id, entity.source_id)
+            return
+        rec = record(entity)
+        _LOGGER.info(
+            "Resuming %s on %s at %s after power-on",
+            rec["title"] if rec else "?",
+            entity.entity_id,
+            _hms(rec["position"]) if rec else "?",
+        )
+        await async_resume(entity)
+        await asyncio.sleep(RESUMING_GRACE)
+    except HomeAssistantError as err:
+        _LOGGER.warning("Could not resume %s after power-on: %s", entity.entity_id, err)
+    finally:
+        _resuming.discard(entity.entity_id)
+        entity.async_write_ha_state()
 
 
 def _check_ended(entity: MusicCastMediaPlayer) -> None:
@@ -383,7 +465,11 @@ async def _resume_after_restart(entity: MusicCastMediaPlayer) -> None:
 
 @callback
 def async_resume_after_restart(hass) -> None:
-    """At startup, resume streams the restart broke, one per speaker."""
+    """At startup, resume streams the restart broke, one per speaker.
+
+    Also follows every player of a speaker with a record, so switching it off
+    and on resumes as well.
+    """
     from homeassistant.helpers.entity_platform import async_get_platforms  # noqa: PLC0415
 
     seen: set[str] = set()
@@ -392,6 +478,8 @@ def async_resume_after_restart(hass) -> None:
             continue
         for entity in platform.entities.values():
             host = _host(entity)
+            if host in resume:
+                _track(entity)  # so switching it off and on resumes too
             if host in seen or host not in resume or entity.source_id != SERVER_INPUT:
                 continue
             seen.add(host)

@@ -11,7 +11,8 @@ integration:
 - **Search box** on MusicCast players.
 - **Title, artist, cover, duration and seeking** for media pushed from Home Assistant
   media sources that provide metadata (e.g. [Radio Nowy Świat](https://github.com/adorobis/ha-nowyswiat)).
-- **Resume after a Home Assistant restart** for such media.
+- **Resume after a Home Assistant restart, and when a speaker switched off mid-episode is
+  switched on again**, for such media.
 - **A queue for such media** (e.g. podcast episodes): Play next / Add to queue, and the next
   episode starts when one ends.
 - **The device's own lists in the media browser**: play queue, recently played, MusicCast playlists,
@@ -88,6 +89,24 @@ remembers what each speaker was playing and where (saved every 30 s), and:
   it, at their live position (a gap of a second or two);
 - resumes speakers that stopped less than 10 minutes ago, unless you stopped or paused them yourself;
 - **Play** in Home Assistant on a stopped speaker resumes at the saved position.
+
+### Resume after switching a speaker off and on
+
+A speaker switched off while it plays such media, and switched on again within 12 hours on the
+Server input, gets it pushed again at the saved position. It doesn't matter how it is switched on
+(Home Assistant, the remote, the MusicCast app). The speaker can't do this itself: its own
+auto-play replays the last item it browsed on a media server, not media pushed to it. A speaker
+switched on to another input, or one you paused or stopped before switching it off, is left alone.
+On a receiver, the zone that was switched off is the one that resumes.
+
+While the push runs (a few seconds) the player has the attribute `resuming: true`. Automations
+that react to a speaker being switched on, e.g. by recalling a preset, can skip it:
+
+```yaml
+conditions:
+  - condition: template
+    value_template: "{{ not state_attr(trigger.entity_id, 'resuming') }}"
+```
 
 ### The device's own lists in the media browser
 
@@ -303,7 +322,9 @@ Dodatki do wbudowanej integracji Yamaha MusicCast:
 - **Wyszukiwarka** na odtwarzaczach MusicCast.
 - **Tytuł, wykonawca, okładka, czas trwania i przewijanie** dla mediów wysyłanych z Home Assistant
   przez źródła z metadanymi, np. [Radio Nowy Świat](https://github.com/adorobis/ha-nowyswiat).
-- **Wznawianie po restarcie Home Assistant**: od razu, od bieżącego miejsca.
+- **Wznawianie po restarcie Home Assistant**: od razu, od bieżącego miejsca. Także po wyłączeniu
+  głośnika w trakcie odcinka i ponownym włączeniu (w ciągu 12 h, na wejściu Server). W tym czasie
+  odtwarzacz ma atrybut `resuming: true`, żeby automatyzacje reagujące na włączenie mogły go pominąć.
 - **Własne listy urządzenia w przeglądarce mediów**: kolejka odtwarzania, ostatnio odtwarzane,
   playlisty MusicCast, zapisane stacje tunera.
 - **Odtwórz następne / Dodaj do kolejki** dla utworów i folderów ze źródeł urządzenia: wpisy na
