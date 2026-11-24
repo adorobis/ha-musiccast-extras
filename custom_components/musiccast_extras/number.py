@@ -1,11 +1,8 @@
 """Numbers: balance, volume in dB, Auro-Matic strength, alarm volume, preset."""
 
-from __future__ import annotations
-
 from typing import Any
 
 from homeassistant.components.number import NumberEntity, NumberMode
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ServiceValidationError
@@ -13,12 +10,17 @@ from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from .const import DOMAIN
-from .device import MusicCastExtrasDevice
+from .coordinator import MusicCastExtrasConfigEntry, MusicCastExtrasDevice
 from .entity import MusicCastExtrasEntity
+
+# One request at a time: the device's web server drops requests under load.
+PARALLEL_UPDATES = 1
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
+    hass: HomeAssistant,
+    entry: MusicCastExtrasConfigEntry,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Create the numbers each device supports, with the ranges it reports."""
     entities: list[NumberEntity] = []
@@ -51,7 +53,7 @@ async def async_setup_entry(
     async_add_entities(entities)
 
 
-def _remove_preset_sensors(hass: HomeAssistant, entry: ConfigEntry) -> None:
+def _remove_preset_sensors(hass: HomeAssistant, entry: MusicCastExtrasConfigEntry) -> None:
     """Remove the Preset sensors of 1.9.0, replaced by the Preset numbers."""
     registry = er.async_get(hass)
     for reg_entry in er.async_entries_for_config_entry(registry, entry.entry_id):

@@ -2,7 +2,6 @@
   "config": {
     "step": {
       "user": {
-        "title": "MusicCast Extras",
         "description": "Adds to your Yamaha MusicCast devices: Tidal browsing and search, recently played, MusicCast playlists and tuner presets in the media browser, CD control, title/cover/seeking for pushed media, resume after restarts, and entities for what each device supports (signal info, Wi-Fi signal, tuner, alarm, scenes, sound options, restart). Requires the Yamaha MusicCast integration."
       }
     },

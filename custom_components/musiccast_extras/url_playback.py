@@ -27,24 +27,23 @@ module instead:
   power-on (e.g. recalling a preset) can leave it alone.
 """
 
-from __future__ import annotations
-
 import asyncio
 from collections.abc import Callable
 import contextlib
 import logging
 import re
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, cast
 from xml.sax.saxutils import escape
 
 import aiohttp
+from aiomusiccast.exceptions import MusicCastException
 from homeassistant.components import media_source
 from homeassistant.components.media_player import (
     MediaPlayerState,
     async_process_play_media_url,
 )
 from homeassistant.const import STATE_UNAVAILABLE
-from homeassistant.core import Event, EventStateChangedData, State, callback
+from homeassistant.core import Event, EventStateChangedData, HomeAssistant, State, callback
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.event import async_track_state_change_event
 from homeassistant.util import dt as dt_util
@@ -86,7 +85,7 @@ def _changed() -> None:
         on_resume_changed()
 
 
-def provider_for(hass, media_id: str | None):
+def provider_for(hass: HomeAssistant, media_id: str | None) -> Any:
     """Return the metadata provider for a media-source ID, if any."""
     if not media_id or not media_source.is_media_source_id(media_id):
         return None
@@ -436,7 +435,7 @@ async def _resume_after_restart(entity: MusicCastMediaPlayer) -> None:
         return
     try:
         info = await _speaker_play_info(entity)
-    except Exception as err:
+    except MusicCastException as err:
         _LOGGER.debug("No play info from %s: %s", entity.entity_id, err)
         return
     if info.get("input") != SERVER_INPUT or info.get("track") != rec["title"]:
@@ -464,7 +463,7 @@ async def _resume_after_restart(entity: MusicCastMediaPlayer) -> None:
 
 
 @callback
-def async_resume_after_restart(hass) -> None:
+def async_resume_after_restart(hass: HomeAssistant) -> None:
     """At startup, resume streams the restart broke, one per speaker.
 
     Also follows every player of a speaker with a record, so switching it off
@@ -476,7 +475,8 @@ def async_resume_after_restart(hass) -> None:
     for platform in async_get_platforms(hass, "yamaha_musiccast"):
         if platform.domain != "media_player":
             continue
-        for entity in platform.entities.values():
+        for platform_entity in platform.entities.values():
+            entity = cast("MusicCastMediaPlayer", platform_entity)
             host = _host(entity)
             if host in resume:
                 _track(entity)  # so switching it off and on resumes too

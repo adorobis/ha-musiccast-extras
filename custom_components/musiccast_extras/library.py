@@ -15,14 +15,12 @@ mcx:tuner:<band>[:<num>], mcx:queue[:<index>] (numbers are 1-based like on
 the device, playlist and queue indexes 0-based).
 """
 
-from __future__ import annotations
-
-from typing import Any
+from typing import Any, TypeGuard
 
 from homeassistant.components.media_player import BrowseError, BrowseMedia, MediaClass
 
 from .browse import _https_thumbnail
-from .device import MusicCastExtrasDevice
+from .coordinator import MusicCastExtrasDevice
 
 PREFIX = "mcx"
 PAGE = 8  # the device returns at most 8 playlist lines per request
@@ -30,9 +28,9 @@ INPUT_CLASSES = {"net_radio": MediaClass.CHANNEL, "tuner": MediaClass.CHANNEL}
 TUNER_BANDS = ("am", "fm", "dab")
 
 
-def is_library_id(media_id: str | None) -> bool:
+def is_library_id(media_id: str | None) -> TypeGuard[str]:
     """Return True for IDs handled here."""
-    return bool(media_id) and media_id.startswith(f"{PREFIX}:")
+    return media_id is not None and media_id.startswith(f"{PREFIX}:")
 
 
 def _folder(

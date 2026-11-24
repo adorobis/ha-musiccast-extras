@@ -1,18 +1,18 @@
 """Switches: zone sound options, HDMI outputs and the alarm."""
 
-from __future__ import annotations
-
 from collections.abc import Callable
 from typing import Any
 
 from homeassistant.components.switch import SwitchEntity
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .device import MusicCastExtrasDevice
+from .coordinator import MusicCastExtrasConfigEntry, MusicCastExtrasDevice
 from .entity import MusicCastExtrasEntity
+
+# One request at a time: the device's web server drops requests under load.
+PARALLEL_UPDATES = 1
 
 # zone func_list entry -> (getStatus key, setter); only when getStatus has the key.
 ZONE_SWITCHES = {
@@ -24,7 +24,9 @@ HDMI_OUTPUTS = (1, 2, 3)
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
+    hass: HomeAssistant,
+    entry: MusicCastExtrasConfigEntry,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Create the switches each device supports."""
     entities: list[SwitchEntity] = []
@@ -36,9 +38,11 @@ async def async_setup_entry(
                 if func in funcs and status_key in status:
                     entities.append(ZoneSwitch(device, zone_id, status_key, setter))
         func_status = (device.data or {}).get("func", {})
-        for n in HDMI_OUTPUTS:
-            if f"hdmi_out_{n}" in f.system and f"hdmi_out_{n}" in func_status:
-                entities.append(HdmiOutSwitch(device, n))
+        entities.extend(
+            HdmiOutSwitch(device, n)
+            for n in HDMI_OUTPUTS
+            if f"hdmi_out_{n}" in f.system and f"hdmi_out_{n}" in func_status
+        )
         clock = (device.data or {}).get("clock", {})
         alarm_block = (
             "alarm" if "alarm" in clock else "multi_alarm" if "multi_alarm" in clock else None

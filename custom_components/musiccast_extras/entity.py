@@ -1,13 +1,11 @@
 """Base entity for the extras, attached to the core MusicCast devices."""
 
-from __future__ import annotations
-
 from typing import Any
 
 from homeassistant.helpers.device_registry import DeviceInfo
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .device import MAIN_ZONE, MusicCastExtrasDevice
+from .coordinator import MAIN_ZONE, MusicCastExtrasDevice
 
 
 class MusicCastExtrasEntity(CoordinatorEntity[MusicCastExtrasDevice]):

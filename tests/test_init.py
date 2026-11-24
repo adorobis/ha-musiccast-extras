@@ -4,6 +4,7 @@ from datetime import timedelta
 from typing import Any
 from unittest.mock import patch
 
+from aiomusiccast.exceptions import MusicCastConnectionException
 from freezegun.api import FrozenDateTimeFactory
 from homeassistant.components.yamaha_musiccast.media_player import MusicCastMediaPlayer
 from homeassistant.config_entries import ConfigEntryState
@@ -80,7 +81,7 @@ async def test_device_skipped(
     async def request_json(request: str | tuple[str, Any]) -> dict[str, Any]:
         url = request[0] if isinstance(request, tuple) else request
         if broken in url:
-            raise TimeoutError
+            raise MusicCastConnectionException
         return await original(request)
 
     receiver.musiccast.device.request_json.side_effect = request_json

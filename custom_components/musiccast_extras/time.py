@@ -1,20 +1,22 @@
 """Time: the alarm time."""
 
-from __future__ import annotations
-
 from datetime import time
 
 from homeassistant.components.time import TimeEntity
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .device import MusicCastExtrasDevice
+from .coordinator import MusicCastExtrasConfigEntry, MusicCastExtrasDevice
 from .entity import MusicCastExtrasEntity
+
+# One request at a time: the device's web server drops requests under load.
+PARALLEL_UPDATES = 1
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
+    hass: HomeAssistant,
+    entry: MusicCastExtrasConfigEntry,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Create an alarm time for devices with a (single) alarm."""
     async_add_entities(

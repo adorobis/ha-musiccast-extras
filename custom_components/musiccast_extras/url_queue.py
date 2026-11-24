@@ -20,11 +20,9 @@ IDs (media_content_id):
     mcxq:clear                            empty the queue
 """
 
-from __future__ import annotations
-
 from collections.abc import Callable
 import logging
-from typing import TYPE_CHECKING, Any
+from typing import TYPE_CHECKING, Any, TypeGuard
 from urllib.parse import quote, unquote
 
 from homeassistant.components import media_source
@@ -33,6 +31,7 @@ from homeassistant.components.media_player import (
     MediaClass,
     MediaPlayerState,
 )
+from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 
 from . import browse, url_playback
@@ -52,9 +51,9 @@ queues: dict[str, list[dict[str, Any]]] = {}
 on_queue_changed: Callable[[], None] | None = None
 
 
-def is_queue_id(media_id: str | None) -> bool:
+def is_queue_id(media_id: str | None) -> TypeGuard[str]:
     """Return True for the IDs of this module."""
-    return bool(media_id) and media_id.startswith(f"{PREFIX}:")
+    return media_id is not None and media_id.startswith(f"{PREFIX}:")
 
 
 def _host(entity: MusicCastMediaPlayer) -> str:
@@ -66,7 +65,7 @@ def _changed() -> None:
         on_queue_changed()
 
 
-def _queueable(hass, item: BrowseMedia) -> bool:
+def _queueable(hass: HomeAssistant, item: BrowseMedia) -> bool:
     return (
         item.can_play
         and item.media_class != MediaClass.CHANNEL  # live streams never end
@@ -241,7 +240,7 @@ async def async_enqueue(
         await async_play_next(entity)
 
 
-async def async_entry_for(hass, media_id: str) -> dict[str, Any]:
+async def async_entry_for(hass: HomeAssistant, media_id: str) -> dict[str, Any]:
     """Return a queue entry for a single media-source item."""
     provider = url_playback.provider_for(hass, media_id)
     info = await provider(hass, media_id) if provider else None

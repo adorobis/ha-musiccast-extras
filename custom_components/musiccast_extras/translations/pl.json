@@ -2,7 +2,6 @@
   "config": {
     "step": {
       "user": {
-        "title": "MusicCast Extras",
         "description": "Dodaje do urządzeń Yamaha MusicCast: przeglądanie i wyszukiwanie Tidala, ostatnio odtwarzane, playlisty MusicCast i stacje tunera w przeglądarce mediów, sterowanie CD, tytuł/okładkę/przewijanie dla wysyłanych mediów, wznawianie po restarcie oraz encje dla funkcji obsługiwanych przez każde urządzenie (sygnał, Wi-Fi, tuner, budzik, sceny, opcje dźwięku, restart). Wymaga integracji Yamaha MusicCast."
       }
     },

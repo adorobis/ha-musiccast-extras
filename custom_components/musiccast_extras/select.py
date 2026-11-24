@@ -1,18 +1,18 @@
 """Selects: Auro-3D modes, speaker pattern, alarm source, preset."""
 
-from __future__ import annotations
-
 from typing import Any
 
 from homeassistant.components.select import SelectEntity
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .device import MusicCastExtrasDevice
+from .coordinator import MusicCastExtrasConfigEntry, MusicCastExtrasDevice
 from .entity import MusicCastExtrasEntity
+
+# One request at a time: the device's web server drops requests under load.
+PARALLEL_UPDATES = 1
 
 STEP_OPTIONS = ("prev", "next", "toggle")  # relative commands, not states
 
@@ -24,7 +24,9 @@ AURO = {
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
+    hass: HomeAssistant,
+    entry: MusicCastExtrasConfigEntry,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Create the selects each device supports, with the options it reports."""
     entities: list[SelectEntity] = []

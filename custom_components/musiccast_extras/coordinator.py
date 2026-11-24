@@ -12,8 +12,6 @@ event (the core integration's UDP push), so changes made on the device or
 in the MusicCast app show up quickly.
 """
 
-from __future__ import annotations
-
 from dataclasses import dataclass, field
 from datetime import timedelta
 import logging
@@ -21,6 +19,7 @@ import re
 from typing import Any
 
 import aiohttp
+from aiomusiccast.exceptions import MusicCastException
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant, callback
 from homeassistant.exceptions import HomeAssistantError
@@ -51,6 +50,8 @@ WEB_PROBE_TIMEOUT = 5  # seconds
 # A configuration URL this integration set (so it may update it).
 OWN_URL = re.compile(r"http://[0-9.]+(/Setup)?/")
 
+
+type MusicCastExtrasConfigEntry = ConfigEntry[dict[str, MusicCastExtrasDevice]]
 
 # host -> device, for the media player patch (filled while the entry is loaded)
 REGISTRY: dict[str, MusicCastExtrasDevice] = {}
@@ -116,7 +117,11 @@ class MusicCastExtrasDevice(DataUpdateCoordinator[dict[str, Any]]):
     """Extra data of one MusicCast device."""
 
     def __init__(
-        self, hass: HomeAssistant, entry: ConfigEntry, core_coordinator: Any, features: Features
+        self,
+        hass: HomeAssistant,
+        entry: MusicCastExtrasConfigEntry,
+        core_coordinator: Any,
+        features: Features,
     ) -> None:
         """Initialize for a loaded core MusicCast coordinator."""
         self.core = core_coordinator
@@ -156,6 +161,7 @@ class MusicCastExtrasDevice(DataUpdateCoordinator[dict[str, Any]]):
 
     @staticmethod
     def _check(path: str, result: Any) -> dict[str, Any]:
+        """Return the answer, raise if it isn't one or reports an error code."""
         if not isinstance(result, dict):
             raise MusicCastApiError(f"{path}: unexpected answer")
         code = result.get("response_code", 0)
@@ -179,6 +185,7 @@ class MusicCastExtrasDevice(DataUpdateCoordinator[dict[str, Any]]):
     # ------------------------------------------------------------ polling
 
     async def _async_update_data(self) -> dict[str, Any]:
+        """Read what the device supports; keep the last data through a few failures."""
         if self.hass.is_stopping:
             # The HTTP session closes during shutdown; keep the last data.
             return self.data or {"zones": {}}
@@ -236,6 +243,7 @@ class MusicCastExtrasDevice(DataUpdateCoordinator[dict[str, Any]]):
 
     @callback
     def _async_on_update(self) -> None:
+        """Follow the IP address; let the core players show the new CD data."""
         self.async_update_configuration_url()
         if "cd" in self.features.inputs:
             # The patched media player shows the CD's track and transport from
@@ -265,7 +273,7 @@ class MusicCastExtrasDevice(DataUpdateCoordinator[dict[str, Any]]):
                     if resp.status == 200:
                         self.web_path = path
                         return
-            except Exception as err:  # any failure means "not there"
+            except (aiohttp.ClientError, TimeoutError) as err:  # "not there"
                 _LOGGER.debug("%s: no %s (%s)", self.host, path, err)
 
     @property
@@ -387,7 +395,7 @@ class MusicCastExtrasDevice(DataUpdateCoordinator[dict[str, Any]]):
 
 
 async def async_create_devices(
-    hass: HomeAssistant, extras_entry: ConfigEntry
+    hass: HomeAssistant, extras_entry: MusicCastExtrasConfigEntry
 ) -> dict[str, MusicCastExtrasDevice]:
     """Create a MusicCastExtrasDevice for every loaded MusicCast entry."""
     devices: dict[str, MusicCastExtrasDevice] = {}
@@ -395,7 +403,7 @@ async def async_create_devices(
         core = entry.runtime_data
         try:
             raw = await core.musiccast.device.request_json(API + "system/getFeatures")
-        except Exception as err:
+        except MusicCastException as err:
             _LOGGER.warning("Skipping %s: no features (%s)", entry.title, err)
             continue
         device = MusicCastExtrasDevice(hass, extras_entry, core, Features.parse(raw))

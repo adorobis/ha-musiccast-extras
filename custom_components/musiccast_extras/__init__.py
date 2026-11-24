@@ -3,17 +3,14 @@
 Extends the core Yamaha MusicCast integration: patches its media player
 (patch.py: Tidal browsing, the device's own lists, CD control, metadata,
 seeking, resume) and adds entities for what each device reports in
-system/getFeatures (device.py and the platforms). Set up from the UI;
+system/getFeatures (coordinator.py and the platforms). Set up from the UI;
 removing the integration undoes the changes.
 """
-
-from __future__ import annotations
 
 from collections.abc import Callable
 import logging
 from typing import Any
 
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EVENT_HOMEASSISTANT_STARTED, Platform
 from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryError
@@ -25,8 +22,9 @@ from homeassistant.helpers import (
 from homeassistant.helpers.storage import Store
 from homeassistant.util import slugify
 
-from . import browse, device as extras_device, patch, url_playback, url_queue
+from . import browse, coordinator as extras_device, patch, url_playback, url_queue
 from .const import DOMAIN, LEGACY_DOMAIN
+from .coordinator import MusicCastExtrasConfigEntry, MusicCastExtrasDevice
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -54,7 +52,7 @@ async def _load_store(hass: HomeAssistant, name: str) -> tuple[Store[dict], dict
     return store, data or {}
 
 
-async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
+async def async_setup_entry(hass: HomeAssistant, entry: MusicCastExtrasConfigEntry) -> None:
     """Patch the MusicCast media players."""
     missing = await hass.async_add_executor_job(patch.missing_hooks)
     if missing:
@@ -139,12 +137,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         device.core.async_update_listeners()
     _LOGGER.info("Extra entities for %d MusicCast device(s)", len(devices))
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
-    return True
 
 
 @callback
 def _migrate_registry(
-    hass: HomeAssistant, entry: ConfigEntry, devices: dict[str, extras_device.MusicCastExtrasDevice]
+    hass: HomeAssistant,
+    entry: MusicCastExtrasConfigEntry,
+    devices: dict[str, MusicCastExtrasDevice],
 ) -> None:
     """Bring entities registered by 1.2.x in line with this version.
 
@@ -192,10 +191,9 @@ def _migrate_registry(
             dev_reg.async_remove_device(device_id)
 
 
-async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Remove the buttons and undo the patches."""
-    if not await hass.config_entries.async_unload_platforms(entry, PLATFORMS):
-        return False
+async def async_unload_entry(hass: HomeAssistant, entry: MusicCastExtrasConfigEntry) -> None:
+    """Remove the entities and undo the patches."""
+    await hass.config_entries.async_unload_platforms_or_raise(entry, PLATFORMS)
     for device in entry.runtime_data.values():
         device.async_stop_events()
     extras_device.REGISTRY.clear()
@@ -204,4 +202,3 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     url_playback.on_resume_changed = None
     url_playback.on_ended = None
     url_queue.on_queue_changed = None
-    return True

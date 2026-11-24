@@ -8,19 +8,19 @@ and 4.38) GET requests, offered only when listed in system func_list:
 Scenes (recallScene) are created per zone from "scene" and "scene_num".
 """
 
-from __future__ import annotations
-
 import logging
 
 from homeassistant.components.button import ButtonDeviceClass, ButtonEntity
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .device import MusicCastExtrasDevice
+from .coordinator import MusicCastExtrasConfigEntry, MusicCastExtrasDevice
 from .entity import MusicCastExtrasEntity
+
+# One request at a time: the device's web server drops requests under load.
+PARALLEL_UPDATES = 1
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -31,7 +31,9 @@ REBOOTS = (
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
+    hass: HomeAssistant,
+    entry: MusicCastExtrasConfigEntry,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Create the buttons each device supports."""
     entities: list[ButtonEntity] = []

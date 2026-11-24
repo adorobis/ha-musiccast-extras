@@ -19,8 +19,6 @@ before patching (and in CI against the newest Home Assistant), so a change
 in Home Assistant disables the extras instead of breaking MusicCast.
 """
 
-from __future__ import annotations
-
 import logging
 from typing import Any
 
@@ -35,7 +33,7 @@ from homeassistant.components.media_player import (
 )
 from homeassistant.exceptions import HomeAssistantError
 
-from . import browse, device as extras_device, library, url_playback, url_queue
+from . import browse, coordinator as extras_device, library, url_playback, url_queue
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -247,7 +245,7 @@ def apply() -> None:
             if info:
                 try:
                     await url_playback.async_play(self, media_id, info)
-                    return
+                    return None
                 except HomeAssistantError as err:
                     # Still play it, the core way (no title/cover/seeking).
                     _LOGGER.warning("Playing %s without metadata: %s", media_id, err)

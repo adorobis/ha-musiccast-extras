@@ -1,7 +1,5 @@
 """Sensors: signal info (one per parameter), network, Wi-Fi signal, tuner, alarms."""
 
-from __future__ import annotations
-
 from typing import Any
 
 from homeassistant.components.sensor import (
@@ -9,13 +7,16 @@ from homeassistant.components.sensor import (
     SensorEntity,
     SensorStateClass,
 )
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import PERCENTAGE, EntityCategory, UnitOfDataRate
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
+from homeassistant.helpers.typing import StateType
 
-from .device import MusicCastExtrasDevice
+from .coordinator import MusicCastExtrasConfigEntry, MusicCastExtrasDevice
 from .entity import MusicCastExtrasEntity
+
+# Read-only, updated by the coordinator.
+PARALLEL_UPDATES = 0
 
 # getSignalInfo "audio" keys -> entity key; created for the keys a zone returns.
 SIGNAL_KEYS = {
@@ -47,7 +48,9 @@ DAYS = ("sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "satur
 
 
 async def async_setup_entry(
-    hass: HomeAssistant, entry: ConfigEntry, async_add_entities: AddConfigEntryEntitiesCallback
+    hass: HomeAssistant,
+    entry: MusicCastExtrasConfigEntry,
+    async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Create the sensors each device supports."""
     entities: list[SensorEntity] = []
@@ -88,12 +91,12 @@ class SignalSensor(MusicCastExtrasEntity, SensorEntity):
             self._attr_native_unit_of_measurement = UnitOfDataRate.KILOBITS_PER_SECOND
             self._attr_state_class = SensorStateClass.MEASUREMENT
         if api_key == "error":
-            self._attr_device_class = "enum"
+            self._attr_device_class = SensorDeviceClass.ENUM
             self._attr_options = list(SIGNAL_ERRORS.values())
             self._attr_entity_category = EntityCategory.DIAGNOSTIC
 
     @property
-    def native_value(self) -> Any:
+    def native_value(self) -> StateType:
         """Return the value, None while the device reports none."""
         value = self.device.zone_signal(self.zone_id).get(self._api_key)
         if self._api_key == "error":

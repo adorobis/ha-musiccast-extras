@@ -650,7 +650,7 @@
     'object_id_base': 'Signal error',
     'options': dict({
     }),
-    'original_device_class': 'enum',
+    'original_device_class': <SensorDeviceClass.ENUM: 'enum'>,
     'original_icon': None,
     'original_name': 'Signal error',
     'platform': 'musiccast_extras',

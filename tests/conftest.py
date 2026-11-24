@@ -17,6 +17,7 @@ from typing import Any
 from unittest.mock import AsyncMock, MagicMock, patch
 from urllib.parse import unquote
 
+from aiomusiccast.exceptions import MusicCastConnectionException
 from aiomusiccast.features import DeviceFeature, ZoneFeature
 from aiomusiccast.musiccast_data import MusicCastData, MusicCastZoneData
 from freezegun.api import FrozenDateTimeFactory
@@ -127,7 +128,7 @@ class FakeYxc:
         path = url.split("/YamahaExtendedControl/v1/", 1)[1]
         base = path.split("?", 1)[0]
         if self.fail or base in self.broken:
-            raise TimeoutError("no answer")
+            raise MusicCastConnectionException
         if base == "system/getFeatures":
             return copy.deepcopy(self.features)
         if base in self.responses:

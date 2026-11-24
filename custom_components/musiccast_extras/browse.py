@@ -27,13 +27,12 @@ again from the root. A per-device lock keeps concurrent requests from the
 frontend from interleaving.
 """
 
-from __future__ import annotations
-
 import asyncio
+from collections.abc import Callable
 from dataclasses import dataclass
 import logging
 import time
-from typing import Any
+from typing import Any, TypeGuard
 from urllib.parse import quote, unquote, urlsplit, urlunsplit
 
 from aiomusiccast.pyamaha import NetUSB
@@ -91,10 +90,11 @@ _names: dict[tuple[str, str, tuple], str] = {}
 # {"id": browse id, "title": str, "thumbnail": str | None}
 LAST_ALIAS = "@last"
 last_played: dict[str, dict] = {}
-on_last_played_changed = None  # set on setup to persist last_played
+on_last_played_changed: Callable[[], None] | None = None  # set on setup: persist last_played
 
 
 def player_host(musiccast: Any) -> str:
+    """Return the IP address of a player, the key of what is kept per player."""
     return getattr(getattr(musiccast, "device", None), "ip", None) or str(id(musiccast))
 
 
@@ -120,6 +120,7 @@ click_mode: dict[str, str] = {}  # player host -> mode
 
 
 def nav_item(title: str, media_id: str, thumbnail: str | None = None) -> BrowseMedia:
+    """Return a folder entry that opens another list."""
     return BrowseMedia(
         title=title,
         media_class=MediaClass.DIRECTORY,
@@ -202,15 +203,16 @@ def parse_id(media_id: str) -> tuple[str, tuple[Step, ...], int, str | None]:
         raise BrowseError(f"Invalid MusicCast browse id: {media_id}") from err
 
 
-def is_our_id(media_id: str | None) -> bool:
+def is_our_id(media_id: str | None) -> TypeGuard[str]:
     """Return True for IDs handled here."""
-    return bool(media_id) and media_id.startswith(PREFIX + ":")
+    return media_id is not None and media_id.startswith(PREFIX + ":")
 
 
 class Navigator:
     """Moves one player's menu cursor along step paths."""
 
     def __init__(self, musiccast: Any, zone_id: str, source: str) -> None:
+        """Navigate the lists of a source on a player."""
         self.mc = musiccast
         self.zone = zone_id
         self.source = source
@@ -219,6 +221,7 @@ class Navigator:
         self.lock = _locks.setdefault(host, asyncio.Lock())
 
     async def info(self, start: int = 0) -> dict:
+        """Return a page of the list the cursor is on."""
         data = await self.mc.get_list_info(self.source, start)
         if "menu_layer" not in data:
             raise HomeAssistantError(f"MusicCast returned no list for {self.source}: {data}")
@@ -274,9 +277,11 @@ class Navigator:
             _names[(*self.key, tuple(path))] = name
 
     def name_of(self, path: tuple[Step, ...]) -> str | None:
+        """Return the name of the list at a path, if it was visited."""
         return _names.get((*self.key, tuple(path)))
 
     def is_sorted_list(self, path: tuple[Step, ...]) -> bool:
+        """Return True if the list at a path is a sort order of its parent."""
         return is_sort_name(self.name_of(path))
 
     def up_path(self, path: tuple[Step, ...]) -> tuple[Step, ...]:
@@ -373,6 +378,7 @@ class Navigator:
 
 
 def is_sort_name(name: str | None) -> bool:
+    """Return True for the name of a sort order ("Sort by ...")."""
     return (name or "").strip().lower().startswith("sort by")
 
 
