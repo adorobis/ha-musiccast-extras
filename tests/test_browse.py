@@ -150,7 +150,7 @@ async def test_menu_stuck(hass_ws_client: WebSocketGenerator, receiver: Speaker)
 async def test_invalid_id(hass_ws_client: WebSocketGenerator) -> None:
     """A broken ID is reported."""
     error = await browse_media(hass_ws_client, RECEIVER_PLAYER, "mctidal:tidal:x:0")
-    assert "Invalid MusicCast browse id" in error["message"]
+    assert "Invalid MusicCast browse ID" in error["message"]
 
 
 async def test_browse_off(hass_ws_client: WebSocketGenerator) -> None:

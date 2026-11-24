@@ -356,11 +356,10 @@ def mock_config_entry() -> MockConfigEntry:
     return MockConfigEntry(domain=DOMAIN, title="MusicCast Extras", data={})
 
 
-@pytest.fixture
-async def core_setup(
+async def async_setup_core(
     hass: HomeAssistant, speakers: list[Speaker], aioclient_mock: AiohttpClientMocker
-) -> list[Speaker]:
-    """Set up the core MusicCast integration with the mocked devices."""
+) -> None:
+    """Set up the core MusicCast entries of some speakers."""
     by_host = {s.host: s.musiccast for s in speakers}
     for speaker in speakers:
         # The receiver serves the advanced web setup, the CD player doesn't.
@@ -371,9 +370,20 @@ async def core_setup(
         side_effect=lambda host, *_: by_host[host],
     ):
         for speaker in speakers:
-            speaker.entry.add_to_hass(hass)
+            if speaker.entry.entry_id not in {
+                e.entry_id for e in hass.config_entries.async_entries()
+            }:
+                speaker.entry.add_to_hass(hass)
             assert await hass.config_entries.async_setup(speaker.entry.entry_id)
         await hass.async_block_till_done()
+
+
+@pytest.fixture
+async def core_setup(
+    hass: HomeAssistant, speakers: list[Speaker], aioclient_mock: AiohttpClientMocker
+) -> list[Speaker]:
+    """Set up the core MusicCast integration with the mocked devices."""
+    await async_setup_core(hass, speakers, aioclient_mock)
     return speakers
 
 

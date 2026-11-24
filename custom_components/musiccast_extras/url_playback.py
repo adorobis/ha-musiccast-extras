@@ -48,6 +48,8 @@ from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.event import async_track_state_change_event
 from homeassistant.util import dt as dt_util
 
+from .const import error
+
 if TYPE_CHECKING:
     from homeassistant.components.yamaha_musiccast.media_player import MusicCastMediaPlayer
 
@@ -167,9 +169,9 @@ async def _soap(entity: MusicCastMediaPlayer, action: str, args: dict[str, Any])
             resp = await device.dlna_avt_request(action, args)
             text = await resp.text()
         except (aiohttp.ClientError, TimeoutError) as err:
-            raise HomeAssistantError(f"MusicCast {action} failed: {err!r}") from err
+            raise error("dlna_failed", action=action, error=repr(err)) from err
     if resp.status >= 400:
-        raise HomeAssistantError(f"MusicCast refused {action} (HTTP {resp.status})")
+        raise error("dlna_refused", action=action, status=resp.status)
     return text
 
 

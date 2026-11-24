@@ -16,8 +16,9 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
+from .const import error
 from .coordinator import MusicCastExtrasConfigEntry, MusicCastExtrasDevice
-from .entity import MusicCastExtrasEntity
+from .entity import MusicCastExtrasEntity, async_setup_device_entities
 
 # One request at a time: the device's web server drops requests under load.
 PARALLEL_UPDATES = 1
@@ -36,29 +37,32 @@ async def async_setup_entry(
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Create the buttons each device supports."""
+    async_setup_device_entities(hass, entry, async_add_entities, _entities)
+
+
+def _entities(device: MusicCastExtrasDevice) -> list[ButtonEntity]:
+    """Return the buttons one device supports."""
     entities: list[ButtonEntity] = []
-    for device in entry.runtime_data.values():
-        f = device.features
-        entities += [
-            RebootButton(device, key, path) for key, feature, path in REBOOTS if feature in f.system
-        ]
-        for zone_id, funcs in f.zones.items():
-            count = f.zone(zone_id).get("scene_num") or 0
-            if "scene" in funcs:
-                entities += [SceneButton(device, zone_id, n) for n in range(1, int(count) + 1)]
-        if "cd" in f.inputs:
-            entities.append(CommandButton(device, "cd_eject", "cd/toggleTray", "mdi:eject"))
-    async_add_entities(entities)
+    f = device.features
+    entities += [
+        RebootButton(device, key, path) for key, feature, path in REBOOTS if feature in f.system
+    ]
+    for zone_id, funcs in f.zones.items():
+        count = f.zone(zone_id).get("scene_num") or 0
+        if "scene" in funcs:
+            entities += [SceneButton(device, zone_id, n) for n in range(1, int(count) + 1)]
+    if "cd" in f.inputs:
+        entities.append(CommandButton(device, "cd_eject", "cd/toggleTray"))
+    return entities
 
 
 class CommandButton(MusicCastExtrasEntity, ButtonEntity):
     """A button sending one GET request."""
 
-    def __init__(self, device: MusicCastExtrasDevice, key: str, path: str, icon: str) -> None:
+    def __init__(self, device: MusicCastExtrasDevice, key: str, path: str) -> None:
         """Initialize."""
         super().__init__(device, key)
         self._path = path
-        self._attr_icon = icon
 
     async def async_press(self) -> None:
         """Send the request."""
@@ -83,14 +87,12 @@ class RebootButton(MusicCastExtrasEntity, ButtonEntity):
         except HomeAssistantError:
             raise
         except Exception as err:
-            raise HomeAssistantError(f"Restart request failed: {err}") from err
+            raise error("restart_failed", error=err) from err
         _LOGGER.info("Requested %s on %s (%s)", self._path, self.device.model, self.device.host)
 
 
 class SceneButton(MusicCastExtrasEntity, ButtonEntity):
     """Recall a scene of a zone."""
-
-    _attr_icon = "mdi:palette"
 
     def __init__(self, device: MusicCastExtrasDevice, zone_id: str, number: int) -> None:
         """Initialize."""

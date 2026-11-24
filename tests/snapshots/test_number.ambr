@@ -30,7 +30,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:alarm',
+    'original_icon': None,
     'original_name': 'Alarm volume',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -45,7 +45,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Kitchen Alarm volume',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:alarm',
       <NumberEntityCapabilityAttribute.MAX: 'max'>: 60,
       <NumberEntityCapabilityAttribute.MIN: 'min'>: 0,
       <NumberEntityCapabilityAttribute.MODE: 'mode'>: <NumberMode.AUTO: 'auto'>,
@@ -90,7 +89,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:star-box-outline',
+    'original_icon': None,
     'original_name': 'Preset',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -105,7 +104,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Kitchen Preset',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:star-box-outline',
       <NumberEntityCapabilityAttribute.MAX: 'max'>: 40,
       <NumberEntityCapabilityAttribute.MIN: 'min'>: 0,
       <NumberEntityCapabilityAttribute.MODE: 'mode'>: <NumberMode.BOX: 'box'>,
@@ -210,7 +208,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:scale-balance',
+    'original_icon': None,
     'original_name': 'Balance',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -225,7 +223,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room Balance',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:scale-balance',
       <NumberEntityCapabilityAttribute.MAX: 'max'>: 6,
       <NumberEntityCapabilityAttribute.MIN: 'min'>: -6,
       <NumberEntityCapabilityAttribute.MODE: 'mode'>: <NumberMode.SLIDER: 'slider'>,
@@ -270,7 +267,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:star-box-outline',
+    'original_icon': None,
     'original_name': 'Preset',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -285,7 +282,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room Preset',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:star-box-outline',
       <NumberEntityCapabilityAttribute.MAX: 'max'>: 40,
       <NumberEntityCapabilityAttribute.MIN: 'min'>: 0,
       <NumberEntityCapabilityAttribute.MODE: 'mode'>: <NumberMode.BOX: 'box'>,
@@ -331,7 +327,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:volume-high',
+    'original_icon': None,
     'original_name': 'Volume (dB)',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -346,7 +342,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room Volume (dB)',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:volume-high',
       <NumberEntityCapabilityAttribute.MAX: 'max'>: 16.5,
       <NumberEntityCapabilityAttribute.MIN: 'min'>: -80.5,
       <NumberEntityCapabilityAttribute.MODE: 'mode'>: <NumberMode.SLIDER: 'slider'>,
@@ -392,7 +387,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:star-box-outline',
+    'original_icon': None,
     'original_name': 'Preset',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -407,7 +402,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Terrace Preset',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:star-box-outline',
       <NumberEntityCapabilityAttribute.MAX: 'max'>: 40,
       <NumberEntityCapabilityAttribute.MIN: 'min'>: 0,
       <NumberEntityCapabilityAttribute.MODE: 'mode'>: <NumberMode.BOX: 'box'>,

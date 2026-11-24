@@ -164,8 +164,10 @@ the amplifier itself still works.
 
 The values are read every minute and a few seconds after the device reports a change (the core
 integration's push updates), so changes made on the device or in the MusicCast app show up
-quickly. Devices that are offline when the integration starts are skipped; reload MusicCast
-Extras once they are back (or after adding a MusicCast device).
+quickly. A device that is offline when the integration starts, or a MusicCast device added
+later, gets its entities as soon as the Yamaha MusicCast integration has set it up, without
+reloading MusicCast Extras. When a MusicCast device is removed or its entry unloaded, its extra
+entities go with it.
 
 ### Play next / Add to queue
 
@@ -259,7 +261,17 @@ installing or updating, before using the new version.
 Copy `custom_components/musiccast_extras` into `config/custom_components/`, restart, then add the
 integration as above.
 
-Removing the integration undoes all changes without a restart.
+## Removal
+
+1. Settings → Devices & services → **MusicCast Extras** → ⋮ → **Delete**. This removes the extra
+   entities and undoes the changes to the MusicCast media players right away, without a restart.
+   The Yamaha MusicCast integration and its devices stay as they are.
+2. To remove the files too: Settings → **Marketplace** → **MusicCast Extras** → ⋮ → **Remove**
+   (or delete `config/custom_components/musiccast_extras` after a manual install), then restart
+   Home Assistant.
+
+What MusicCast Extras remembers (last played lists, positions of pushed media, the media queue)
+is kept in `.storage/musiccast_extras.*`; delete those files if you won't install it again.
 
 ## How it works, and what if Home Assistant changes
 
@@ -320,11 +332,17 @@ After a change to what the entities show, update the snapshots with
 
 ## Troubleshooting
 
-```yaml
-logger:
-  logs:
-    custom_components.musiccast_extras: debug
-```
+- **Diagnostics:** Settings → Devices & services → **MusicCast Extras** → ⋮ → **Download
+  diagnostics** gives what each device reports (its features and last data) and what is kept for
+  it, with network details, MAC addresses, serial numbers and media IDs removed. Attach it to an
+  issue.
+- **Debug log:**
+
+  ```yaml
+  logger:
+    logs:
+      custom_components.musiccast_extras: debug
+  ```
 
 ---
 
@@ -370,6 +388,17 @@ połączyć Marketplace z GitHubem) → ⋮ → *Custom repositories* →
 `https://github.com/adorobis/ha-musiccast-extras` (typ *Integration*) → pobierz **MusicCast Extras**
 → restart HA → Ustawienia → Urządzenia i usługi → *Dodaj integrację* → **MusicCast Extras**.
 Po każdej instalacji i aktualizacji zrestartuj HA, zanim zaczniesz używać nowej wersji.
+
+Urządzenie, które było wyłączone przy starcie HA (albo dodane później), dostaje swoje encje, gdy
+tylko integracja Yamaha MusicCast je skonfiguruje, bez przeładowania MusicCast Extras.
+
+Usunięcie: Ustawienia → Urządzenia i usługi → **MusicCast Extras** → ⋮ → *Usuń*. Encje dodatku
+znikają, a odtwarzacze MusicCast wracają do zwykłego działania od razu, bez restartu. Pliki usuwa
+się w Marketplace (⋮ → *Remove*), a potem restartuje HA. Zapamiętane dane (ostatnie listy, pozycje,
+kolejka) są w `.storage/musiccast_extras.*`.
+
+Diagnostyka: Ustawienia → Urządzenia i usługi → **MusicCast Extras** → ⋮ → *Pobierz diagnostykę*
+(bez adresów IP i MAC, nazw sieci, numerów seryjnych i identyfikatorów mediów).
 
 Dodatek nie zastępuje integracji MusicCast, tylko ją rozszerza. Jeśli aktualizacja Home Assistant
 zmieni integrację MusicCast, dodatki się wyłączą (z komunikatem w naprawach), a sam MusicCast będzie

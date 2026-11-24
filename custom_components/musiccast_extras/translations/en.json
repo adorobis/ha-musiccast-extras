@@ -152,5 +152,106 @@
         "name": "Alarm time"
       }
     }
+  },
+  "exceptions": {
+    "invalid_browse_id": {
+      "message": "Invalid MusicCast browse ID: {media_id}"
+    },
+    "no_list": {
+      "message": "The device returned no list for {source}."
+    },
+    "menu_stuck": {
+      "message": "The device's menu did not reach layer {layer} (still at {current} \"{name}\")."
+    },
+    "menu_no_root": {
+      "message": "Could not return the device's menu to the top."
+    },
+    "search_failed": {
+      "message": "The device could not search (response code {code})."
+    },
+    "search_empty": {
+      "message": "Enter something to search for."
+    },
+    "search_no_entry": {
+      "message": "{source} has no search entry."
+    },
+    "search_unsupported": {
+      "message": "Search is not supported for {source}."
+    },
+    "off_search": {
+      "message": "The device has to be turned on to search."
+    },
+    "off_browse": {
+      "message": "The device has to be turned on to browse media."
+    },
+    "nothing_to_play": {
+      "message": "Nothing to play here."
+    },
+    "nothing_to_add": {
+      "message": "Nothing to add here."
+    },
+    "unknown_queue_action": {
+      "message": "Unknown queue action {action}."
+    },
+    "enqueue_refused": {
+      "message": "The device refused {kind} (response code {code})."
+    },
+    "queue_only_device_items": {
+      "message": "Only items browsed from the device's own sources can be queued."
+    },
+    "unexpected_answer": {
+      "message": "{path}: unexpected answer from the device."
+    },
+    "response_code": {
+      "message": "{path}: response code {code}."
+    },
+    "command_failed": {
+      "message": "{model} ({host}): {path} failed: {error}"
+    },
+    "update_failed": {
+      "message": "{model} ({host}): {reason} ({count} refreshes in a row)."
+    },
+    "restart_failed": {
+      "message": "Restart request failed: {error}"
+    },
+    "tuner_preset_range": {
+      "message": "The tuner has presets 1-{max}, not {number}."
+    },
+    "preset_empty": {
+      "message": "Preset {number} is empty."
+    },
+    "preset_unknown": {
+      "message": "No preset named {option}."
+    },
+    "incompatible": {
+      "message": "Incompatible Home Assistant version, missing: {missing}"
+    },
+    "unknown_folder": {
+      "message": "Unknown folder {media_id}."
+    },
+    "not_playable": {
+      "message": "Not playable: {media_id}"
+    },
+    "unknown_queue_folder": {
+      "message": "Unknown queue folder {media_id}."
+    },
+    "nothing_queueable": {
+      "message": "Nothing here can be queued."
+    },
+    "cannot_queue": {
+      "message": "{media_id} can't be queued."
+    },
+    "queue_changed": {
+      "message": "The queue has changed, open it again."
+    },
+    "seek_unsupported": {
+      "message": "Seeking is only supported for pushed media with metadata."
+    },
+    "dlna_failed": {
+      "message": "The device's {action} request failed: {error}"
+    },
+    "dlna_refused": {
+      "message": "The device refused {action} (HTTP {status})."
+    }
   }
 }

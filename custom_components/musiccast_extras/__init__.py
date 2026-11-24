@@ -7,10 +7,17 @@ system/getFeatures (coordinator.py and the platforms). Set up from the UI;
 removing the integration undoes the changes.
 """
 
+import asyncio
 from collections.abc import Callable
 import logging
 from typing import Any
 
+from homeassistant.config_entries import (
+    SIGNAL_CONFIG_ENTRY_CHANGED,
+    ConfigEntry,
+    ConfigEntryChange,
+    ConfigEntryState,
+)
 from homeassistant.const import EVENT_HOMEASSISTANT_STARTED, Platform
 from homeassistant.core import Event, HomeAssistant, callback
 from homeassistant.exceptions import ConfigEntryError
@@ -19,11 +26,12 @@ from homeassistant.helpers import (
     entity_registry as er,
     issue_registry as ir,
 )
+from homeassistant.helpers.dispatcher import async_dispatcher_connect, async_dispatcher_send
 from homeassistant.helpers.storage import Store
 from homeassistant.util import slugify
 
 from . import browse, coordinator as extras_device, patch, url_playback, url_queue
-from .const import DOMAIN, LEGACY_DOMAIN
+from .const import DOMAIN, LEGACY_DOMAIN, error
 from .coordinator import MusicCastExtrasConfigEntry, MusicCastExtrasDevice
 
 _LOGGER = logging.getLogger(__name__)
@@ -65,7 +73,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: MusicCastExtrasConfigEnt
             translation_key="incompatible",
             translation_placeholders={"missing": ", ".join(missing)},
         )
-        raise ConfigEntryError(f"Incompatible Home Assistant version, missing: {missing}")
+        raise error("incompatible", ConfigEntryError, missing=", ".join(missing))
     ir.async_delete_issue(hass, DOMAIN, "incompatible")
 
     last_store, last_played = await _load_store(hass, "last_played")
@@ -137,6 +145,67 @@ async def async_setup_entry(hass: HomeAssistant, entry: MusicCastExtrasConfigEnt
         device.core.async_update_listeners()
     _LOGGER.info("Extra entities for %d MusicCast device(s)", len(devices))
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+
+    lock = asyncio.Lock()
+
+    @callback
+    def _core_entry_changed(change: ConfigEntryChange, core_entry: ConfigEntry) -> None:
+        if core_entry.domain == extras_device.MUSICCAST_DOMAIN:
+            entry.async_create_background_task(
+                hass,
+                _async_sync_device(hass, entry, core_entry, lock),
+                f"musiccast_extras sync {core_entry.title}",
+            )
+
+    entry.async_on_unload(
+        async_dispatcher_connect(hass, SIGNAL_CONFIG_ENTRY_CHANGED, _core_entry_changed)
+    )
+    # Catch up with entries that changed while the devices were being created.
+    for core_entry in hass.config_entries.async_entries(extras_device.MUSICCAST_DOMAIN):
+        _core_entry_changed(ConfigEntryChange.UPDATED, core_entry)
+
+
+async def _async_sync_device(
+    hass: HomeAssistant,
+    entry: MusicCastExtrasConfigEntry,
+    core_entry: ConfigEntry,
+    lock: asyncio.Lock,
+) -> None:
+    """Follow a MusicCast entry that loaded or unloaded after the extras were set up.
+
+    A speaker that was offline when Home Assistant started, one added later
+    or a reloaded entry gets its extras without reloading them; an unloaded
+    entry's device and entities go away, so nothing uses its old connection.
+    """
+    async with lock:
+        devices = entry.runtime_data
+        current = next(
+            (d for d in devices.values() if d.core.config_entry.entry_id == core_entry.entry_id),
+            None,
+        )
+        loaded = core_entry.state is ConfigEntryState.LOADED
+        if current is not None and (not loaded or current.core is not core_entry.runtime_data):
+            _LOGGER.info("Removing the extras of %s", core_entry.title)
+            current.async_stop_events()
+            devices.pop(current.host, None)
+            if extras_device.REGISTRY.get(current.host) is current:
+                del extras_device.REGISTRY[current.host]
+            async_dispatcher_send(hass, current.removed_signal)
+            await current.async_shutdown()
+            current = None
+        if not loaded or current is not None:
+            return
+        device = await extras_device.async_create_device(hass, entry, core_entry)
+        if device is None:
+            return
+        if entry.state is not ConfigEntryState.LOADED:
+            device.async_stop_events()  # the extras were unloaded meanwhile
+            return
+        _LOGGER.info("Adding the extras of %s", core_entry.title)
+        devices[device.host] = device
+        extras_device.REGISTRY[device.host] = device
+        device.core.async_update_listeners()
+        async_dispatcher_send(hass, extras_device.SIGNAL_NEW_DEVICE, device)
 
 
 @callback

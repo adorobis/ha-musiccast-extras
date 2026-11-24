@@ -9,9 +9,9 @@ from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers import entity_registry as er
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
-from .const import DOMAIN
+from .const import DOMAIN, error
 from .coordinator import MusicCastExtrasConfigEntry, MusicCastExtrasDevice
-from .entity import MusicCastExtrasEntity
+from .entity import MusicCastExtrasEntity, async_setup_device_entities
 
 # One request at a time: the device's web server drops requests under load.
 PARALLEL_UPDATES = 1
@@ -23,34 +23,34 @@ async def async_setup_entry(
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Create the numbers each device supports, with the ranges it reports."""
-    entities: list[NumberEntity] = []
-    for device in entry.runtime_data.values():
-        f = device.features
-        for zone_id, funcs in f.zones.items():
-            status = device.zone_status(zone_id)
-            if (
-                "balance" in funcs
-                and "balance" in status
-                and (r := f.zone_range(zone_id, "balance"))
-            ):
-                entities.append(ZoneNumber(device, zone_id, "balance", r))
-            if (
-                "actual_volume" in funcs
-                and status.get("actual_volume", {}).get("mode") == "db"
-                and (r := f.zone_range(zone_id, "actual_volume_db"))
-            ):
-                entities.append(ZoneNumber(device, zone_id, "actual_volume", r))
-            if "auro_matic_strength" in status.get("auro_3d", {}) and (
-                r := f.zone_range(zone_id, "auro_matic_strength")
-            ):
-                entities.append(ZoneNumber(device, zone_id, "auro_matic_strength", r))
-        alarm = (device.data or {}).get("clock", {}).get("alarm", {})
-        if "volume" in alarm and (r := f.clock_range("alarm_volume")):
-            entities.append(AlarmVolume(device, r))
-        if device.netusb_inputs or f.tuner:
-            entities += [PresetNumber(device, zone_id) for zone_id in f.zones]
     _remove_preset_sensors(hass, entry)
-    async_add_entities(entities)
+    async_setup_device_entities(hass, entry, async_add_entities, _entities)
+
+
+def _entities(device: MusicCastExtrasDevice) -> list[NumberEntity]:
+    """Return the numbers one device supports, with the ranges it reports."""
+    entities: list[NumberEntity] = []
+    f = device.features
+    for zone_id, funcs in f.zones.items():
+        status = device.zone_status(zone_id)
+        if "balance" in funcs and "balance" in status and (r := f.zone_range(zone_id, "balance")):
+            entities.append(ZoneNumber(device, zone_id, "balance", r))
+        if (
+            "actual_volume" in funcs
+            and status.get("actual_volume", {}).get("mode") == "db"
+            and (r := f.zone_range(zone_id, "actual_volume_db"))
+        ):
+            entities.append(ZoneNumber(device, zone_id, "actual_volume", r))
+        if "auro_matic_strength" in status.get("auro_3d", {}) and (
+            r := f.zone_range(zone_id, "auro_matic_strength")
+        ):
+            entities.append(ZoneNumber(device, zone_id, "auro_matic_strength", r))
+    alarm = (device.data or {}).get("clock", {}).get("alarm", {})
+    if "volume" in alarm and (r := f.clock_range("alarm_volume")):
+        entities.append(AlarmVolume(device, r))
+    if device.netusb_inputs or f.tuner:
+        entities += [PresetNumber(device, zone_id) for zone_id in f.zones]
+    return entities
 
 
 def _remove_preset_sensors(hass: HomeAssistant, entry: MusicCastExtrasConfigEntry) -> None:
@@ -80,10 +80,6 @@ class ZoneNumber(MusicCastExtrasEntity, NumberEntity):
         self._attr_native_step = rng["step"]
         if key == "actual_volume":
             self._attr_native_unit_of_measurement = "dB"
-            self._attr_icon = "mdi:volume-high"
-        elif key == "balance":
-            self._attr_icon = "mdi:scale-balance"
-            self._attr_entity_category = EntityCategory.CONFIG
         else:
             self._attr_entity_category = EntityCategory.CONFIG
 
@@ -110,8 +106,6 @@ class ZoneNumber(MusicCastExtrasEntity, NumberEntity):
 
 class AlarmVolume(MusicCastExtrasEntity, NumberEntity):
     """Volume of the alarm."""
-
-    _attr_icon = "mdi:alarm"
 
     def __init__(self, device: MusicCastExtrasDevice, rng: dict[str, Any]) -> None:
         """Initialize."""
@@ -141,7 +135,6 @@ class PresetNumber(MusicCastExtrasEntity, NumberEntity):
     zone on and selects its input). 0 does nothing.
     """
 
-    _attr_icon = "mdi:star-box-outline"
     _attr_mode = NumberMode.BOX
     _attr_native_min_value = 0
     _attr_native_step = 1
@@ -183,8 +176,11 @@ class PresetNumber(MusicCastExtrasEntity, NumberEntity):
         band = self.data.get("tuner", {}).get("band")
         if zone is not None and zone.power == "on" and zone.input == "tuner" and band:
             if number > self._tuner_max:
-                raise ServiceValidationError(
-                    f"The tuner has presets 1-{self._tuner_max}, not {number}"
+                raise error(
+                    "tuner_preset_range",
+                    ServiceValidationError,
+                    max=self._tuner_max,
+                    number=number,
                 )
             if self._tuner_type == "common":
                 band = "common"
@@ -193,5 +189,5 @@ class PresetNumber(MusicCastExtrasEntity, NumberEntity):
             )
             return
         if number not in self.device.core.data.netusb_preset_list:
-            raise ServiceValidationError(f"Preset {number} is empty")
+            raise error("preset_empty", ServiceValidationError, number=number)
         await self.device.command(f"netusb/recallPreset?zone={self.zone_id}&num={number}")

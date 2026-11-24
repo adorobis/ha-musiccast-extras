@@ -17,11 +17,12 @@ from homeassistant.helpers import (
 )
 import pytest
 from pytest_homeassistant.common import MockConfigEntry, async_fire_time_changed
+from pytest_homeassistant.test_util.aiohttp import AiohttpClientMocker
 
 from custom_components.musiccast_extras import browse, patch as extras_patch
 from custom_components.musiccast_extras.const import DOMAIN
 
-from .conftest import RECEIVER_ID, Speaker, core_device, refresh
+from .conftest import RECEIVER_HOST, RECEIVER_ID, Speaker, async_setup_core, core_device, refresh
 
 
 @pytest.mark.usefixtures("core_setup")
@@ -305,3 +306,79 @@ async def test_setup_during_startup(
     assert resume.called is started
     if started:
         assert await hass.config_entries.async_unload(mock_config_entry.entry_id)
+
+
+async def test_speaker_loaded_later(
+    hass: HomeAssistant,
+    receiver: Speaker,
+    cd_player: Speaker,
+    aioclient_mock: AiohttpClientMocker,
+    mock_config_entry: MockConfigEntry,
+) -> None:
+    """A speaker whose MusicCast entry loads after the extras gets them without a reload."""
+    await async_setup_core(hass, [cd_player], aioclient_mock)
+    mock_config_entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(mock_config_entry.entry_id)
+    await hass.async_block_till_done()
+    assert hass.states.get("button.living_room_restart") is None
+
+    await async_setup_core(hass, [receiver], aioclient_mock)
+    await hass.async_block_till_done()
+    assert hass.states.get("button.living_room_restart")
+    assert extras_device_registry()[RECEIVER_HOST].core is receiver.entry.runtime_data
+    assert await hass.config_entries.async_unload(mock_config_entry.entry_id)
+
+
+@pytest.mark.parametrize("platforms", [[Platform.BUTTON]])
+async def test_speaker_unloaded_and_reloaded(
+    hass: HomeAssistant, init_integration: MockConfigEntry, receiver: Speaker
+) -> None:
+    """An unloaded MusicCast entry takes its extras along; reloaded, they come back."""
+    old = extras_device_registry()[RECEIVER_HOST]
+    assert await hass.config_entries.async_unload(receiver.entry.entry_id)
+    await hass.async_block_till_done()
+    assert hass.states.get("button.living_room_restart").state == STATE_UNAVAILABLE
+    assert RECEIVER_HOST not in extras_device_registry()
+    assert RECEIVER_HOST not in init_integration.runtime_data
+
+    with patch(
+        "homeassistant.components.yamaha_musiccast.MusicCastDevice",
+        return_value=receiver.musiccast,
+    ):
+        assert await hass.config_entries.async_setup(receiver.entry.entry_id)
+        await hass.async_block_till_done()
+    new = extras_device_registry()[RECEIVER_HOST]
+    assert new is not old
+    assert new.core is receiver.entry.runtime_data
+    assert hass.states.get("button.living_room_restart").state != STATE_UNAVAILABLE
+
+    await hass.services.async_call(
+        "button", "press", {"entity_id": "button.living_room_restart"}, blocking=True
+    )
+    assert receiver.yxc.paths() == ["system/requestSystemReboot"]
+
+
+async def test_speaker_loaded_later_unreadable(
+    hass: HomeAssistant,
+    receiver: Speaker,
+    cd_player: Speaker,
+    aioclient_mock: AiohttpClientMocker,
+    mock_config_entry: MockConfigEntry,
+) -> None:
+    """A speaker loaded later that can't be read gets no extras."""
+    await async_setup_core(hass, [cd_player], aioclient_mock)
+    mock_config_entry.add_to_hass(hass)
+    assert await hass.config_entries.async_setup(mock_config_entry.entry_id)
+    await hass.async_block_till_done()
+    receiver.yxc.broken.add("system/getFeatures")
+    await async_setup_core(hass, [receiver], aioclient_mock)
+    await hass.async_block_till_done()
+    assert hass.states.get("button.living_room_restart") is None
+    assert await hass.config_entries.async_unload(mock_config_entry.entry_id)
+
+
+def extras_device_registry() -> dict[str, Any]:
+    """Return the extras devices the media player patch uses."""
+    from custom_components.musiccast_extras import coordinator  # noqa: PLC0415
+
+    return coordinator.REGISTRY

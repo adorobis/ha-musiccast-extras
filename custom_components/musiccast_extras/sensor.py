@@ -13,7 +13,7 @@ from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 from homeassistant.helpers.typing import StateType
 
 from .coordinator import MusicCastExtrasConfigEntry, MusicCastExtrasDevice
-from .entity import MusicCastExtrasEntity
+from .entity import MusicCastExtrasEntity, async_setup_device_entities
 
 # Read-only, updated by the coordinator.
 PARALLEL_UPDATES = 0
@@ -53,31 +53,35 @@ async def async_setup_entry(
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Create the sensors each device supports."""
+    async_setup_device_entities(hass, entry, async_add_entities, _entities)
+
+
+def _entities(device: MusicCastExtrasDevice) -> list[SensorEntity]:
+    """Return the sensors one device supports."""
     entities: list[SensorEntity] = []
-    for device in entry.runtime_data.values():
-        for zone_id in device.features.zones:
-            for api_key, key in SIGNAL_KEYS.items():
-                if api_key in device.zone_signal(zone_id):
-                    entities.append(SignalSensor(device, zone_id, api_key, key))
-        network = (device.data or {}).get("network", {})
-        if network.get("ip_address"):
-            entities.append(IpAddressSensor(device))
-        if network.get("connection"):
-            entities.append(ConnectionSensor(device))
-        if network.get("mac_address"):
-            entities.append(MacAddressSensor(device))
-        if network.get("connection") == "wireless_lan" and "strength" in network.get(
-            "wireless_lan", {}
-        ):
-            entities.append(WifiSignalSensor(device))
-        if device.features.tuner:
-            entities += [TunerSensor(device, key) for key in ("tuner_band", "tuner_station")]
-            if device.features.tuner & {"rds", "dab"}:
-                entities.append(TunerSensor(device, "tuner_text"))
-        clock = (device.data or {}).get("clock", {})
-        for index, _ in enumerate(clock.get("multi_alarm", {}).get("settings", [])):
-            entities.append(MultiAlarmSensor(device, index))
-    async_add_entities(entities)
+    for zone_id in device.features.zones:
+        for api_key, key in SIGNAL_KEYS.items():
+            if api_key in device.zone_signal(zone_id):
+                entities.append(SignalSensor(device, zone_id, api_key, key))
+    network = (device.data or {}).get("network", {})
+    if network.get("ip_address"):
+        entities.append(IpAddressSensor(device))
+    if network.get("connection"):
+        entities.append(ConnectionSensor(device))
+    if network.get("mac_address"):
+        entities.append(MacAddressSensor(device))
+    if network.get("connection") == "wireless_lan" and "strength" in network.get(
+        "wireless_lan", {}
+    ):
+        entities.append(WifiSignalSensor(device))
+    if device.features.tuner:
+        entities += [TunerSensor(device, key) for key in ("tuner_band", "tuner_station")]
+        if device.features.tuner & {"rds", "dab"}:
+            entities.append(TunerSensor(device, "tuner_text"))
+    clock = (device.data or {}).get("clock", {})
+    for index, _ in enumerate(clock.get("multi_alarm", {}).get("settings", [])):
+        entities.append(MultiAlarmSensor(device, index))
+    return entities
 
 
 class SignalSensor(MusicCastExtrasEntity, SensorEntity):
@@ -110,7 +114,6 @@ class IpAddressSensor(MusicCastExtrasEntity, SensorEntity):
     """The device's IP address, with the rest of its network settings."""
 
     _attr_entity_category = EntityCategory.DIAGNOSTIC
-    _attr_icon = "mdi:ip-network"
 
     def __init__(self, device: MusicCastExtrasDevice) -> None:
         """Initialize."""
@@ -149,7 +152,6 @@ class ConnectionSensor(MusicCastExtrasEntity, SensorEntity):
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_device_class = SensorDeviceClass.ENUM
     _attr_options = CONNECTIONS
-    _attr_icon = "mdi:lan-connect"
 
     def __init__(self, device: MusicCastExtrasDevice) -> None:
         """Initialize."""
@@ -167,7 +169,6 @@ class MacAddressSensor(MusicCastExtrasEntity, SensorEntity):
 
     _attr_entity_category = EntityCategory.DIAGNOSTIC
     _attr_entity_registry_enabled_default = False
-    _attr_icon = "mdi:network-outline"
 
     def __init__(self, device: MusicCastExtrasDevice) -> None:
         """Initialize."""
@@ -197,7 +198,6 @@ class WifiSignalSensor(MusicCastExtrasEntity, SensorEntity):
     _attr_native_unit_of_measurement = PERCENTAGE
     _attr_state_class = SensorStateClass.MEASUREMENT
     _attr_entity_category = EntityCategory.DIAGNOSTIC
-    _attr_icon = "mdi:wifi"
 
     def __init__(self, device: MusicCastExtrasDevice) -> None:
         """Initialize."""
@@ -230,7 +230,6 @@ class TunerSensor(MusicCastExtrasEntity, SensorEntity):
     def __init__(self, device: MusicCastExtrasDevice, key: str) -> None:
         """Initialize."""
         super().__init__(device, key)
-        self._attr_icon = "mdi:radio"
 
     @property
     def native_value(self) -> str | None:
@@ -273,8 +272,6 @@ class TunerSensor(MusicCastExtrasEntity, SensorEntity):
 
 class MultiAlarmSensor(MusicCastExtrasEntity, SensorEntity):
     """One alarm of a device with several alarms (read-only)."""
-
-    _attr_icon = "mdi:alarm"
 
     def __init__(self, device: MusicCastExtrasDevice, index: int) -> None:
         """Initialize."""

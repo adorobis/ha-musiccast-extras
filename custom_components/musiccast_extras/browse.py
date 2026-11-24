@@ -45,6 +45,8 @@ from homeassistant.components.media_player import (
 )
 from homeassistant.exceptions import HomeAssistantError
 
+from .const import error
+
 _LOGGER = logging.getLogger(__name__)
 
 PREFIX = "mctidal"
@@ -200,7 +202,7 @@ def parse_id(media_id: str) -> tuple[str, tuple[Step, ...], int, str | None]:
             raise ValueError
         return source, tuple(steps), int(start), query
     except ValueError as err:
-        raise BrowseError(f"Invalid MusicCast browse id: {media_id}") from err
+        raise error("invalid_browse_id", BrowseError, media_id=media_id) from err
 
 
 def is_our_id(media_id: str | None) -> TypeGuard[str]:
@@ -224,7 +226,8 @@ class Navigator:
         """Return a page of the list the cursor is on."""
         data = await self.mc.get_list_info(self.source, start)
         if "menu_layer" not in data:
-            raise HomeAssistantError(f"MusicCast returned no list for {self.source}: {data}")
+            _LOGGER.debug("No list for %s: %s", self.source, data)
+            raise error("no_list", source=self.source)
         return data
 
     async def _wait_layer(self, layer: int) -> dict:
@@ -246,9 +249,11 @@ class Navigator:
                 return data
             previous = signature if signature[0] == layer else None
             if time.monotonic() > deadline:
-                raise HomeAssistantError(
-                    f"MusicCast menu did not reach layer {layer} "
-                    f"(still at {data['menu_layer']} '{data.get('menu_name')}')"
+                raise error(
+                    "menu_stuck",
+                    layer=layer,
+                    current=data["menu_layer"],
+                    name=data.get("menu_name") or "",
                 )
             await asyncio.sleep(POLL_INTERVAL)
 
@@ -260,7 +265,7 @@ class Navigator:
                 return data
             await self.mc.return_in_list(self.zone)
             data = await self._wait_layer(layer - 1)
-        raise HomeAssistantError("Could not return MusicCast menu to the root")
+        raise error("menu_no_root")
 
     async def _step(self, step: Step, query: str | None) -> None:
         if isinstance(step, int):
@@ -270,7 +275,7 @@ class Navigator:
             NetUSB.set_search_string(query or "", "main", int(step[1:]))
         )
         if result.get("response_code") not in (0, None):
-            raise HomeAssistantError(f"MusicCast search failed: {result}")
+            raise error("search_failed", code=result.get("response_code"))
 
     def _remember_name(self, path: list[Step], data: dict) -> None:
         if name := data.get("menu_name"):
@@ -590,13 +595,13 @@ async def async_search(
     """Search ``source`` from its root search entry."""
     search_text = search_text.strip()
     if not search_text:
-        raise SearchError("Enter something to search for")
+        raise error("search_empty", SearchError)
     nav = Navigator(musiccast, zone_id, source)
     async with nav.lock:
         root = await nav.goto(())
         index = _search_entry_index(await nav.read(root, 0, 64))
         if index is None:
-            raise SearchError(f"{source} has no search entry")
+            raise error("search_no_entry", SearchError, source=source)
         path: tuple[Step, ...] = (f"s{index}",)
         data = await nav.goto(path, search_text)
         entries = await nav.read(data, 0, SEARCH_RESULTS)
@@ -632,7 +637,7 @@ async def async_play(musiccast: Any, zone_id: str, media_id: str) -> None:
         return
     source, path, _start, query = parse_id(media_id)
     if not path or isinstance(path[-1], str):
-        raise HomeAssistantError("Nothing to play here")
+        raise error("nothing_to_play")
     nav = Navigator(musiccast, zone_id, source)
     index = path[-1]
     async with nav.lock:
@@ -671,10 +676,10 @@ async def async_enqueue(musiccast: Any, zone_id: str, media_id: str, kind: str) 
     position in that list.
     """
     if kind not in ENQUEUE_TYPES:
-        raise HomeAssistantError(f"Unknown queue action {kind}")
+        raise error("unknown_queue_action", action=kind)
     source, path, _start, query = parse_id(media_id)
     if not path or isinstance(path[-1], str):
-        raise HomeAssistantError("Nothing to add here")
+        raise error("nothing_to_add")
     nav = Navigator(musiccast, zone_id, source)
     index = path[-1]
     async with nav.lock:
@@ -686,4 +691,4 @@ async def async_enqueue(musiccast: Any, zone_id: str, media_id: str, kind: str) 
         )
     code = result.get("response_code") if isinstance(result, dict) else None
     if code not in (0, None):
-        raise HomeAssistantError(f"The device refused {kind} (response code {code})")
+        raise error("enqueue_refused", kind=kind, code=code)

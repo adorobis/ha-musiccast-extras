@@ -9,7 +9,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
 from .coordinator import MusicCastExtrasConfigEntry, MusicCastExtrasDevice
-from .entity import MusicCastExtrasEntity
+from .entity import MusicCastExtrasEntity, async_setup_device_entities
 
 # One request at a time: the device's web server drops requests under load.
 PARALLEL_UPDATES = 1
@@ -29,60 +29,62 @@ async def async_setup_entry(
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Create the switches each device supports."""
+    async_setup_device_entities(hass, entry, async_add_entities, _entities)
+
+
+def _entities(device: MusicCastExtrasDevice) -> list[SwitchEntity]:
+    """Return the switches one device supports."""
     entities: list[SwitchEntity] = []
-    for device in entry.runtime_data.values():
-        f = device.features
-        for zone_id, funcs in f.zones.items():
-            status = device.zone_status(zone_id)
-            for func, (status_key, setter) in ZONE_SWITCHES.items():
-                if func in funcs and status_key in status:
-                    entities.append(ZoneSwitch(device, zone_id, status_key, setter))
-        func_status = (device.data or {}).get("func", {})
-        entities.extend(
-            HdmiOutSwitch(device, n)
-            for n in HDMI_OUTPUTS
-            if f"hdmi_out_{n}" in f.system and f"hdmi_out_{n}" in func_status
+    f = device.features
+    for zone_id, funcs in f.zones.items():
+        status = device.zone_status(zone_id)
+        for func, (status_key, setter) in ZONE_SWITCHES.items():
+            if func in funcs and status_key in status:
+                entities.append(ZoneSwitch(device, zone_id, status_key, setter))
+    func_status = (device.data or {}).get("func", {})
+    entities.extend(
+        HdmiOutSwitch(device, n)
+        for n in HDMI_OUTPUTS
+        if f"hdmi_out_{n}" in f.system and f"hdmi_out_{n}" in func_status
+    )
+    clock = (device.data or {}).get("clock", {})
+    alarm_block = "alarm" if "alarm" in clock else "multi_alarm" if "multi_alarm" in clock else None
+    if alarm_block:
+        entities.append(
+            AlarmSwitch(
+                device,
+                "alarm_on",
+                lambda c, b=alarm_block: c[b].get("alarm_on"),
+                lambda v: {"alarm_on": v},
+            )
         )
-        clock = (device.data or {}).get("clock", {})
-        alarm_block = (
-            "alarm" if "alarm" in clock else "multi_alarm" if "multi_alarm" in clock else None
+    if "oneday" in clock.get("alarm", {}):
+        entities.append(
+            AlarmSwitch(
+                device,
+                "alarm_enabled",
+                lambda c: c["alarm"]["oneday"].get("enable"),
+                lambda v: {"detail": {"day": "oneday", "enable": v}},
+            )
         )
-        if alarm_block:
+        entities.append(
+            AlarmSwitch(
+                device,
+                "alarm_beep",
+                lambda c: c["alarm"]["oneday"].get("beep"),
+                lambda v: {"detail": {"day": "oneday", "beep": v}},
+            )
+        )
+        if "snooze" in f.clock:
             entities.append(
                 AlarmSwitch(
                     device,
-                    "alarm_on",
-                    lambda c, b=alarm_block: c[b].get("alarm_on"),
-                    lambda v: {"alarm_on": v},
+                    "alarm_snooze",
+                    lambda c: c["alarm"]["oneday"].get("snooze"),
+                    lambda v: {"detail": {"day": "oneday", "snooze": v}},
                 )
             )
-        if "oneday" in clock.get("alarm", {}):
-            entities.append(
-                AlarmSwitch(
-                    device,
-                    "alarm_enabled",
-                    lambda c: c["alarm"]["oneday"].get("enable"),
-                    lambda v: {"detail": {"day": "oneday", "enable": v}},
-                )
-            )
-            entities.append(
-                AlarmSwitch(
-                    device,
-                    "alarm_beep",
-                    lambda c: c["alarm"]["oneday"].get("beep"),
-                    lambda v: {"detail": {"day": "oneday", "beep": v}},
-                )
-            )
-            if "snooze" in f.clock:
-                entities.append(
-                    AlarmSwitch(
-                        device,
-                        "alarm_snooze",
-                        lambda c: c["alarm"]["oneday"].get("snooze"),
-                        lambda v: {"detail": {"day": "oneday", "snooze": v}},
-                    )
-                )
-    async_add_entities(entities)
+    return entities
 
 
 class ZoneSwitch(MusicCastExtrasEntity, SwitchEntity):
@@ -114,7 +116,6 @@ class HdmiOutSwitch(MusicCastExtrasEntity, SwitchEntity):
     """An HDMI output of an AV receiver."""
 
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_icon = "mdi:video-input-hdmi"
 
     def __init__(self, device: MusicCastExtrasDevice, number: int) -> None:
         """Initialize."""
@@ -142,8 +143,6 @@ class HdmiOutSwitch(MusicCastExtrasEntity, SwitchEntity):
 
 class AlarmSwitch(MusicCastExtrasEntity, SwitchEntity):
     """An alarm setting (clock/setAlarmSettings)."""
-
-    _attr_icon = "mdi:alarm"
 
     def __init__(
         self,

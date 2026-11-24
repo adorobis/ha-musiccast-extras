@@ -25,7 +25,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:alarm',
+    'original_icon': None,
     'original_name': 'Alarm',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -40,7 +40,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Kitchen Alarm',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:alarm',
     }),
     'context': <ANY>,
     'entity_id': 'switch.kitchen_alarm',
@@ -76,7 +75,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:alarm',
+    'original_icon': None,
     'original_name': 'Alarm beep',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -91,7 +90,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Kitchen Alarm beep',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:alarm',
     }),
     'context': <ANY>,
     'entity_id': 'switch.kitchen_alarm_beep',
@@ -127,7 +125,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:alarm',
+    'original_icon': None,
     'original_name': 'Alarm enabled',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -142,7 +140,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Kitchen Alarm enabled',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:alarm',
     }),
     'context': <ANY>,
     'entity_id': 'switch.kitchen_alarm_enabled',
@@ -178,7 +175,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:alarm',
+    'original_icon': None,
     'original_name': 'Alarm snooze',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -193,7 +190,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Kitchen Alarm snooze',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:alarm',
     }),
     'context': <ANY>,
     'entity_id': 'switch.kitchen_alarm_snooze',
@@ -279,7 +275,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:video-input-hdmi',
+    'original_icon': None,
     'original_name': 'HDMI out 1',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -294,7 +290,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room HDMI out 1',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:video-input-hdmi',
     }),
     'context': <ANY>,
     'entity_id': 'switch.living_room_hdmi_out_1',
@@ -330,7 +325,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:video-input-hdmi',
+    'original_icon': None,
     'original_name': 'HDMI out 2',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -345,7 +340,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room HDMI out 2',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:video-input-hdmi',
     }),
     'context': <ANY>,
     'entity_id': 'switch.living_room_hdmi_out_2',

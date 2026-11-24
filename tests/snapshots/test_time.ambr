@@ -25,7 +25,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:alarm',
+    'original_icon': None,
     'original_name': 'Alarm time',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -40,7 +40,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Kitchen Alarm time',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:alarm',
     }),
     'context': <ANY>,
     'entity_id': 'time.kitchen_alarm_time',

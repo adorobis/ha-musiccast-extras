@@ -1,0 +1,94 @@
+{
+  "entity": {
+    "button": {
+      "cd_eject": {
+        "default": "mdi:eject"
+      },
+      "scene": {
+        "default": "mdi:palette"
+      }
+    },
+    "number": {
+      "actual_volume": {
+        "default": "mdi:volume-high"
+      },
+      "balance": {
+        "default": "mdi:scale-balance"
+      },
+      "alarm_volume": {
+        "default": "mdi:alarm"
+      },
+      "preset": {
+        "default": "mdi:star-box-outline"
+      }
+    },
+    "select": {
+      "speaker_pattern": {
+        "default": "mdi:speaker-multiple"
+      },
+      "alarm_source": {
+        "default": "mdi:alarm"
+      },
+      "preset_select": {
+        "default": "mdi:star-box-multiple-outline"
+      }
+    },
+    "sensor": {
+      "ip_address": {
+        "default": "mdi:ip-network"
+      },
+      "connection": {
+        "default": "mdi:lan-connect"
+      },
+      "mac_address": {
+        "default": "mdi:network-outline"
+      },
+      "wifi_signal": {
+        "default": "mdi:wifi"
+      },
+      "tuner_band": {
+        "default": "mdi:radio"
+      },
+      "tuner_station": {
+        "default": "mdi:radio"
+      },
+      "tuner_text": {
+        "default": "mdi:radio"
+      },
+      "multi_alarm": {
+        "default": "mdi:alarm",
+        "state": {
+          "off": "mdi:alarm-off"
+        }
+      }
+    },
+    "switch": {
+      "hdmi_out": {
+        "default": "mdi:video-input-hdmi"
+      },
+      "alarm_on": {
+        "default": "mdi:alarm",
+        "state": {
+          "off": "mdi:alarm-off"
+        }
+      },
+      "alarm_enabled": {
+        "default": "mdi:alarm",
+        "state": {
+          "off": "mdi:alarm-off"
+        }
+      },
+      "alarm_beep": {
+        "default": "mdi:alarm-bell"
+      },
+      "alarm_snooze": {
+        "default": "mdi:alarm-snooze"
+      }
+    },
+    "time": {
+      "alarm_time": {
+        "default": "mdi:alarm"
+      }
+    }
+  }
+}

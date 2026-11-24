@@ -152,5 +152,106 @@
         "name": "Godzina budzika"
       }
     }
+  },
+  "exceptions": {
+    "invalid_browse_id": {
+      "message": "Nieprawidłowy identyfikator MusicCast: {media_id}"
+    },
+    "no_list": {
+      "message": "Urządzenie nie zwróciło listy dla {source}."
+    },
+    "menu_stuck": {
+      "message": "Menu urządzenia nie doszło do poziomu {layer} (nadal na {current} \"{name}\")."
+    },
+    "menu_no_root": {
+      "message": "Nie udało się wrócić na początek menu urządzenia."
+    },
+    "search_failed": {
+      "message": "Urządzenie nie mogło wyszukać (kod odpowiedzi {code})."
+    },
+    "search_empty": {
+      "message": "Wpisz, czego szukać."
+    },
+    "search_no_entry": {
+      "message": "{source} nie ma wyszukiwania."
+    },
+    "search_unsupported": {
+      "message": "Wyszukiwanie nie jest dostępne dla {source}."
+    },
+    "off_search": {
+      "message": "Urządzenie musi być włączone, żeby wyszukiwać."
+    },
+    "off_browse": {
+      "message": "Urządzenie musi być włączone, żeby przeglądać multimedia."
+    },
+    "nothing_to_play": {
+      "message": "Tu nie ma czego odtworzyć."
+    },
+    "nothing_to_add": {
+      "message": "Tu nie ma czego dodać."
+    },
+    "unknown_queue_action": {
+      "message": "Nieznana akcja kolejki {action}."
+    },
+    "enqueue_refused": {
+      "message": "Urządzenie odrzuciło {kind} (kod odpowiedzi {code})."
+    },
+    "queue_only_device_items": {
+      "message": "Do kolejki można dodać tylko pozycje z własnych źródeł urządzenia."
+    },
+    "unexpected_answer": {
+      "message": "{path}: nieoczekiwana odpowiedź urządzenia."
+    },
+    "response_code": {
+      "message": "{path}: kod odpowiedzi {code}."
+    },
+    "command_failed": {
+      "message": "{model} ({host}): {path} nie powiodło się: {error}"
+    },
+    "update_failed": {
+      "message": "{model} ({host}): {reason} ({count} odświeżeń z rzędu)."
+    },
+    "restart_failed": {
+      "message": "Restart nie powiódł się: {error}"
+    },
+    "tuner_preset_range": {
+      "message": "Tuner ma presety 1-{max}, nie {number}."
+    },
+    "preset_empty": {
+      "message": "Preset {number} jest pusty."
+    },
+    "preset_unknown": {
+      "message": "Nie ma presetu {option}."
+    },
+    "incompatible": {
+      "message": "Niezgodna wersja Home Assistant, brakuje: {missing}"
+    },
+    "unknown_folder": {
+      "message": "Nieznany folder {media_id}."
+    },
+    "not_playable": {
+      "message": "Nie można odtworzyć: {media_id}"
+    },
+    "unknown_queue_folder": {
+      "message": "Nieznany folder kolejki {media_id}."
+    },
+    "nothing_queueable": {
+      "message": "Nic tutaj nie da się dodać do kolejki."
+    },
+    "cannot_queue": {
+      "message": "{media_id} nie da się dodać do kolejki."
+    },
+    "queue_changed": {
+      "message": "Kolejka się zmieniła, otwórz ją ponownie."
+    },
+    "seek_unsupported": {
+      "message": "Przewijanie działa tylko dla wysłanych multimediów z metadanymi."
+    },
+    "dlna_failed": {
+      "message": "Żądanie {action} do urządzenia nie powiodło się: {error}"
+    },
+    "dlna_refused": {
+      "message": "Urządzenie odrzuciło {action} (HTTP {status})."
+    }
   }
 }

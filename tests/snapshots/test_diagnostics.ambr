@@ -1,0 +1,344 @@
+# serializer version: 1
+# name: test_diagnostics
+  dict({
+    'devices': list([
+      dict({
+        'click_mode': 'play',
+        'data': dict({
+          'func': dict({
+            'hdmi_out_1': True,
+            'hdmi_out_2': False,
+            'response_code': 0,
+            'speaker_pattern': 1,
+          }),
+          'network': dict({
+            'connection': 'wired_lan',
+            'default_gateway': '**REDACTED**',
+            'dhcp': True,
+            'dns_server_1': '**REDACTED**',
+            'dns_server_2': '',
+            'ip_address': '**REDACTED**',
+            'mac_address': '**REDACTED**',
+            'network_name': '**REDACTED**',
+            'response_code': 0,
+            'subnet_mask': '**REDACTED**',
+          }),
+          'tuner': dict({
+            'band': 'dab',
+            'dab': dict({
+              'bit_rate': 128,
+              'dab_plus': True,
+              'dls': 'Now: Some Song',
+              'ensemble_label': 'MUX 1',
+              'preset': 3,
+              'program_type': 'Pop',
+              'quality': 90,
+              'service_label': 'Radio Example',
+            }),
+            'fm': dict({
+              'freq': 98400,
+              'preset': 2,
+            }),
+            'rds': dict({
+              'program_service': 'FM ONE ',
+              'radio_text_a': ' Hello ',
+              'radio_text_b': '',
+            }),
+            'response_code': 0,
+          }),
+          'zones': dict({
+            'main': dict({
+              'signal': dict({
+                'bit': '16 bit',
+                'bitrate': 0,
+                'error': 0,
+                'format': 'PCM',
+                'fs': '44.1 kHz',
+              }),
+              'status': dict({
+                'actual_volume': dict({
+                  'mode': 'db',
+                  'unit': 'dB',
+                  'value': -30.5,
+                }),
+                'auro_3d': dict({
+                  'auro_matic_preset': 'medium',
+                  'auro_matic_strength': 10,
+                  'listening_mode': 'auro_3d',
+                }),
+                'balance': 0,
+                'input': 'tidal',
+                'power': 'on',
+                'response_code': 0,
+                'surround_ai': True,
+              }),
+            }),
+            'zone2': dict({
+              'status': dict({
+                'input': 'net_radio',
+                'power': 'standby',
+                'response_code': 0,
+              }),
+            }),
+          }),
+        }),
+        'device_id': '**REDACTED**',
+        'features': dict({
+          'netusb': dict({
+            'func_list': list([
+              'recent_info',
+              'play_queue',
+              'mc_playlist',
+            ]),
+            'preset': dict({
+              'num': 40,
+            }),
+          }),
+          'response_code': 0,
+          'system': dict({
+            'func_list': list([
+              'system_reboot',
+              'network_reboot',
+              'speaker_pattern',
+              'hdmi_out_1',
+              'hdmi_out_2',
+            ]),
+            'input_list': list([
+              dict({
+                'id': 'tidal',
+                'play_info_type': 'netusb',
+              }),
+              dict({
+                'id': 'server',
+                'play_info_type': 'netusb',
+              }),
+              dict({
+                'id': 'net_radio',
+                'play_info_type': 'netusb',
+              }),
+              dict({
+                'id': 'tuner',
+                'play_info_type': 'tuner',
+              }),
+              dict({
+                'id': 'hdmi1',
+                'play_info_type': 'none',
+              }),
+            ]),
+            'speaker_pattern_num': 2,
+          }),
+          'tuner': dict({
+            'func_list': list([
+              'fm',
+              'dab',
+              'rds',
+            ]),
+            'preset': dict({
+              'num': 40,
+              'type': 'separate',
+            }),
+          }),
+          'zone': list([
+            dict({
+              'auro_3d_listening_mode_list': list([
+                'prev',
+                'next',
+                'auro_3d',
+                'auro_matic',
+              ]),
+              'auro_matic_preset_list': list([
+                'small',
+                'medium',
+                'large',
+              ]),
+              'func_list': list([
+                'power',
+                'volume',
+                'scene',
+                'signal_info',
+                'balance',
+                'actual_volume',
+                'surround_ai',
+              ]),
+              'id': 'main',
+              'range_step': list([
+                dict({
+                  'id': 'balance',
+                  'max': 6,
+                  'min': -6,
+                  'step': 1,
+                }),
+                dict({
+                  'id': 'actual_volume_db',
+                  'max': 16.5,
+                  'min': -80.5,
+                  'step': 0.5,
+                }),
+                dict({
+                  'id': 'auro_matic_strength',
+                  'max': 16,
+                  'min': 1,
+                  'step': 1,
+                }),
+              ]),
+              'scene_num': 2,
+            }),
+            dict({
+              'func_list': list([
+                'power',
+                'volume',
+                'scene',
+              ]),
+              'id': 'zone2',
+              'scene_num': 1,
+            }),
+          ]),
+        }),
+        'last_played_list': None,
+        'last_update_success': True,
+        'media_queue_length': 0,
+        'model': 'RX-A8A',
+        'pushed_media': None,
+        'web_path': '/Setup/',
+      }),
+      dict({
+        'click_mode': 'play',
+        'data': dict({
+          'cd': dict({
+            'album': 'CD Album',
+            'artist': 'CD Band',
+            'play_time': 42,
+            'playback': 'play',
+            'response_code': 0,
+            'total_time': 200,
+            'track': 'CD Song',
+          }),
+          'cd_updated': '2026-11-24T12:00:00+00:00',
+          'clock': dict({
+            'alarm': dict({
+              'alarm_on': True,
+              'oneday': dict({
+                'beep': False,
+                'enable': True,
+                'resume': dict({
+                  'input': 'net_radio',
+                }),
+                'snooze': False,
+                'time': '0715',
+              }),
+              'volume': 20,
+            }),
+            'response_code': 0,
+          }),
+          'func': dict({
+            'response_code': 0,
+          }),
+          'network': dict({
+            'connection': 'wireless_lan',
+            'ip_address': '**REDACTED**',
+            'mac_address': '**REDACTED**',
+            'network_name': '**REDACTED**',
+            'response_code': 0,
+            'wireless_lan': dict({
+              'ch': 6,
+              'ssid': '**REDACTED**',
+              'strength': 75,
+            }),
+          }),
+          'zones': dict({
+            'main': dict({
+              'status': dict({
+                'input': 'cd',
+                'mono': False,
+                'power': 'on',
+                'response_code': 0,
+              }),
+            }),
+          }),
+        }),
+        'device_id': '**REDACTED**',
+        'features': dict({
+          'clock': dict({
+            'alarm_input_list': list([
+              'none',
+              'net_radio',
+              'cd',
+            ]),
+            'func_list': list([
+              'alarm',
+              'snooze',
+            ]),
+            'range_step': list([
+              dict({
+                'id': 'alarm_volume',
+                'max': 60,
+                'min': 0,
+                'step': 1,
+              }),
+            ]),
+          }),
+          'netusb': dict({
+            'func_list': list([
+            ]),
+            'preset': dict({
+              'num': 40,
+            }),
+          }),
+          'response_code': 0,
+          'system': dict({
+            'func_list': list([
+              'network_reboot',
+            ]),
+            'input_list': list([
+              dict({
+                'id': 'net_radio',
+                'play_info_type': 'netusb',
+              }),
+              dict({
+                'id': 'server',
+                'play_info_type': 'netusb',
+              }),
+              dict({
+                'id': 'cd',
+                'play_info_type': 'cd',
+              }),
+            ]),
+          }),
+          'zone': list([
+            dict({
+              'func_list': list([
+                'power',
+                'volume',
+                'mono',
+              ]),
+              'id': 'main',
+            }),
+          ]),
+        }),
+        'last_played_list': None,
+        'last_update_success': True,
+        'media_queue_length': 0,
+        'model': 'CD-NT670',
+        'pushed_media': None,
+        'web_path': '/',
+      }),
+    ]),
+    'patch': dict({
+      'path_inputs': list([
+        'usb',
+        'server',
+        'net_radio',
+        'rhapsody',
+        'napster',
+        'pandora',
+        'siriusxm',
+        'juke',
+        'radiko',
+        'qobuz',
+        'deezer',
+        'amazon_music',
+        'tidal',
+      ]),
+    }),
+  })
+# ---

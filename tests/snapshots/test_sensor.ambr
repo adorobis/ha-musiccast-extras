@@ -34,7 +34,7 @@
     'options': dict({
     }),
     'original_device_class': <SensorDeviceClass.ENUM: 'enum'>,
-    'original_icon': 'mdi:lan-connect',
+    'original_icon': None,
     'original_name': 'Connection',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -50,7 +50,6 @@
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.DEVICE_CLASS: 'device_class'>: 'enum',
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Kitchen Connection',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:lan-connect',
       <SensorEntityCapabilityAttribute.OPTIONS: 'options'>: list([
         'wired_lan',
         'wireless_lan',
@@ -94,7 +93,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:ip-network',
+    'original_icon': None,
     'original_name': 'IP address',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -109,7 +108,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Kitchen IP address',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:ip-network',
       'network_name': 'Kitchen',
       'web_settings': 'http://192.168.1.20/',
     }),
@@ -147,7 +145,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:network-outline',
+    'original_icon': None,
     'original_name': 'MAC address',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -162,7 +160,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Kitchen MAC address',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:network-outline',
       'wired_lan': 'AABBCCDDEE11',
       'wireless_lan': 'AABBCCDDEE12',
     }),
@@ -202,7 +199,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:wifi',
+    'original_icon': None,
     'original_name': 'Wi-Fi signal',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -219,7 +216,6 @@
       'channel': 6,
       'connection': 'wireless_lan',
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Kitchen Wi-Fi signal',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:wifi',
       'ssid': 'Home',
       <SensorEntityCapabilityAttribute.STATE_CLASS: 'state_class'>: <SensorStateClass.MEASUREMENT: 'measurement'>,
       <EntityStateAttribute.UNIT_OF_MEASUREMENT: 'unit_of_measurement'>: '%',
@@ -421,7 +417,7 @@
     'options': dict({
     }),
     'original_device_class': <SensorDeviceClass.ENUM: 'enum'>,
-    'original_icon': 'mdi:lan-connect',
+    'original_icon': None,
     'original_name': 'Connection',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -437,7 +433,6 @@
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.DEVICE_CLASS: 'device_class'>: 'enum',
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room Connection',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:lan-connect',
       <SensorEntityCapabilityAttribute.OPTIONS: 'options'>: list([
         'wired_lan',
         'wireless_lan',
@@ -481,7 +476,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:ip-network',
+    'original_icon': None,
     'original_name': 'IP address',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -499,7 +494,6 @@
       'dhcp': True,
       'dns_server_1': '192.168.1.1',
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room IP address',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:ip-network',
       'network_name': 'Living room',
       'subnet_mask': '255.255.255.0',
       'web_settings': 'http://192.168.1.10/',
@@ -539,7 +533,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:network-outline',
+    'original_icon': None,
     'original_name': 'MAC address',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -554,7 +548,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room MAC address',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:network-outline',
       'wired_lan': 'AABBCCDDEE01',
       'wireless_lan': 'AABBCCDDEE02',
     }),
@@ -710,7 +703,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:radio',
+    'original_icon': None,
     'original_name': 'Tuner band',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -725,7 +718,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room Tuner band',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:radio',
     }),
     'context': <ANY>,
     'entity_id': 'sensor.living_room_tuner_band',
@@ -761,7 +753,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:radio',
+    'original_icon': None,
     'original_name': 'Tuner station',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -779,7 +771,6 @@
       'dab_plus': True,
       'ensemble': 'MUX 1',
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room Tuner station',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:radio',
       'program_type': 'Pop',
       'quality': 90,
     }),
@@ -817,7 +808,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:radio',
+    'original_icon': None,
     'original_name': 'Tuner text',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -832,7 +823,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room Tuner text',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:radio',
     }),
     'context': <ANY>,
     'entity_id': 'sensor.living_room_tuner_text',

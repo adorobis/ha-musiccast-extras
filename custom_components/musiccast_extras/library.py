@@ -20,6 +20,7 @@ from typing import Any, TypeGuard
 from homeassistant.components.media_player import BrowseError, BrowseMedia, MediaClass
 
 from .browse import _https_thumbnail
+from .const import error
 from .coordinator import MusicCastExtrasDevice
 
 PREFIX = "mcx"
@@ -98,7 +99,7 @@ async def async_browse(device: MusicCastExtrasDevice, media_id: str) -> BrowseMe
         return folder
     if kind == "tuner" and len(parts) == 2:
         return await _tuner(device, parts[1])
-    raise BrowseError(f"Unknown folder {media_id}")
+    raise error("unknown_folder", BrowseError, media_id=media_id)
 
 
 async def _queue(device: MusicCastExtrasDevice) -> BrowseMedia:
@@ -223,4 +224,4 @@ async def async_play(device: MusicCastExtrasDevice, zone_id: str, media_id: str)
             f"tuner/recallPreset?zone={zone_id}&band={parts[1]}&num={int(parts[2])}"
         )
     else:
-        raise BrowseError(f"Not playable: {media_id}")
+        raise error("not_playable", BrowseError, media_id=media_id)

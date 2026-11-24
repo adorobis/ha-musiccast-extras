@@ -25,7 +25,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:eject',
+    'original_icon': None,
     'original_name': 'Eject CD',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -40,7 +40,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Kitchen Eject CD',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:eject',
     }),
     'context': <ANY>,
     'entity_id': 'button.kitchen_eject_cd',
@@ -229,7 +228,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:palette',
+    'original_icon': None,
     'original_name': 'Scene 1',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -244,7 +243,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room Scene 1',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:palette',
     }),
     'context': <ANY>,
     'entity_id': 'button.living_room_scene_1',
@@ -280,7 +278,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:palette',
+    'original_icon': None,
     'original_name': 'Scene 2',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -295,7 +293,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room Scene 2',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:palette',
     }),
     'context': <ANY>,
     'entity_id': 'button.living_room_scene_2',
@@ -331,7 +328,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:palette',
+    'original_icon': None,
     'original_name': 'Scene 1',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -346,7 +343,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Terrace Scene 1',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:palette',
     }),
     'context': <ANY>,
     'entity_id': 'button.terrace_scene_1',

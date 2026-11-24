@@ -31,7 +31,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:alarm',
+    'original_icon': None,
     'original_name': 'Alarm source',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -46,7 +46,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Kitchen Alarm source',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:alarm',
       <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
         'none',
         'net_radio',
@@ -93,7 +92,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:star-box-multiple-outline',
+    'original_icon': None,
     'original_name': 'Preset name',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -108,7 +107,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Kitchen Preset name',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:star-box-multiple-outline',
       <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
         'Album 3 [TIDAL]',
         'Album 3 [NET RADIO]',
@@ -276,7 +274,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:star-box-multiple-outline',
+    'original_icon': None,
     'original_name': 'Preset name',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -291,7 +289,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room Preset name',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:star-box-multiple-outline',
       <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
         'Album 3 [TIDAL]',
         'Album 3 [NET RADIO]',
@@ -338,7 +335,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:speaker-multiple',
+    'original_icon': None,
     'original_name': 'Speaker pattern',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -353,7 +350,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room Speaker pattern',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:speaker-multiple',
       <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
         '1',
         '2',
@@ -399,7 +395,7 @@
     'options': dict({
     }),
     'original_device_class': None,
-    'original_icon': 'mdi:star-box-multiple-outline',
+    'original_icon': None,
     'original_name': 'Preset name',
     'platform': 'musiccast_extras',
     'previous_unique_id': None,
@@ -414,7 +410,6 @@
   StateSnapshot({
     'attributes': ReadOnlyDict({
       <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Terrace Preset name',
-      <EntityStateAttribute.ICON: 'icon'>: 'mdi:star-box-multiple-outline',
       <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
         'Album 3 [TIDAL]',
         'Album 3 [NET RADIO]',

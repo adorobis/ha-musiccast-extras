@@ -8,8 +8,9 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ServiceValidationError
 from homeassistant.helpers.entity_platform import AddConfigEntryEntitiesCallback
 
+from .const import error
 from .coordinator import MusicCastExtrasConfigEntry, MusicCastExtrasDevice
-from .entity import MusicCastExtrasEntity
+from .entity import MusicCastExtrasEntity, async_setup_device_entities
 
 # One request at a time: the device's web server drops requests under load.
 PARALLEL_UPDATES = 1
@@ -29,25 +30,29 @@ async def async_setup_entry(
     async_add_entities: AddConfigEntryEntitiesCallback,
 ) -> None:
     """Create the selects each device supports, with the options it reports."""
+    async_setup_device_entities(hass, entry, async_add_entities, _entities)
+
+
+def _entities(device: MusicCastExtrasDevice) -> list[SelectEntity]:
+    """Return the selects one device supports, with the options it reports."""
     entities: list[SelectEntity] = []
-    for device in entry.runtime_data.values():
-        f = device.features
-        for zone_id in f.zones:
-            auro = device.zone_status(zone_id).get("auro_3d", {})
-            for key, (list_key, setter, param) in AURO.items():
-                options = [o for o in f.zone(zone_id).get(list_key, []) if o not in STEP_OPTIONS]
-                if key in auro and options:
-                    entities.append(AuroSelect(device, zone_id, key, options, setter, param))
-        patterns = f.raw.get("system", {}).get("speaker_pattern_num")
-        if "speaker_pattern" in f.system and patterns:
-            entities.append(SpeakerPatternSelect(device, int(patterns)))
-        alarm = (device.data or {}).get("clock", {}).get("alarm", {})
-        inputs = f.raw.get("clock", {}).get("alarm_input_list", [])
-        if "oneday" in alarm and inputs:
-            entities.append(AlarmSourceSelect(device, inputs))
-        if device.netusb_inputs:
-            entities += [PresetSelect(device, zone_id) for zone_id in f.zones]
-    async_add_entities(entities)
+    f = device.features
+    for zone_id in f.zones:
+        auro = device.zone_status(zone_id).get("auro_3d", {})
+        for key, (list_key, setter, param) in AURO.items():
+            options = [o for o in f.zone(zone_id).get(list_key, []) if o not in STEP_OPTIONS]
+            if key in auro and options:
+                entities.append(AuroSelect(device, zone_id, key, options, setter, param))
+    patterns = f.raw.get("system", {}).get("speaker_pattern_num")
+    if "speaker_pattern" in f.system and patterns:
+        entities.append(SpeakerPatternSelect(device, int(patterns)))
+    alarm = (device.data or {}).get("clock", {}).get("alarm", {})
+    inputs = f.raw.get("clock", {}).get("alarm_input_list", [])
+    if "oneday" in alarm and inputs:
+        entities.append(AlarmSourceSelect(device, inputs))
+    if device.netusb_inputs:
+        entities += [PresetSelect(device, zone_id) for zone_id in f.zones]
+    return entities
 
 
 class AuroSelect(MusicCastExtrasEntity, SelectEntity):
@@ -86,7 +91,6 @@ class SpeakerPatternSelect(MusicCastExtrasEntity, SelectEntity):
     """Speaker pattern (stored speaker setups of an AV receiver)."""
 
     _attr_entity_category = EntityCategory.CONFIG
-    _attr_icon = "mdi:speaker-multiple"
 
     def __init__(self, device: MusicCastExtrasDevice, count: int) -> None:
         """Initialize."""
@@ -106,8 +110,6 @@ class SpeakerPatternSelect(MusicCastExtrasEntity, SelectEntity):
 
 class AlarmSourceSelect(MusicCastExtrasEntity, SelectEntity):
     """What the alarm plays ("none" = beep only)."""
-
-    _attr_icon = "mdi:alarm"
 
     def __init__(self, device: MusicCastExtrasDevice, inputs: list[str]) -> None:
         """Initialize."""
@@ -135,8 +137,6 @@ class PresetSelect(MusicCastExtrasEntity, SelectEntity):
     No option is selected (state unknown) while the zone plays none of the
     presets. Recalling turns the zone on and selects the preset's input.
     """
-
-    _attr_icon = "mdi:star-box-multiple-outline"
 
     def __init__(self, device: MusicCastExtrasDevice, zone_id: str) -> None:
         """Initialize."""
@@ -168,5 +168,5 @@ class PresetSelect(MusicCastExtrasEntity, SelectEntity):
         """Recall the preset."""
         number = self.device.netusb_preset_labels().get(option)
         if number is None:
-            raise ServiceValidationError(f"No preset named {option}")
+            raise error("preset_unknown", ServiceValidationError, option=option)
         await self.device.command(f"netusb/recallPreset?zone={self.zone_id}&num={number}")

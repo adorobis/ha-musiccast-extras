@@ -35,6 +35,7 @@ from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import HomeAssistantError
 
 from . import browse, url_playback
+from .const import error
 
 if TYPE_CHECKING:
     from homeassistant.components.yamaha_musiccast.media_player import MusicCastMediaPlayer
@@ -149,7 +150,7 @@ def browse_queue(entity: MusicCastMediaPlayer, media_id: str) -> BrowseMedia:
     """Return the queue folder."""
     host = _host(entity)
     if media_id != LIST_ID:
-        raise HomeAssistantError(f"Unknown queue folder {media_id}")
+        raise error("unknown_queue_folder", media_id=media_id)
     queue = queues.get(host, [])
     folder = BrowseMedia(
         title=_title(entity),
@@ -224,7 +225,7 @@ async def async_enqueue(
 ) -> None:
     """Add entries (play_next: right after the current item); start if idle."""
     if not entries:
-        raise HomeAssistantError("Nothing here can be queued")
+        raise error("nothing_queueable")
     host = _host(entity)
     queue = queues.setdefault(host, [])
     if kind == "play_next":
@@ -245,7 +246,7 @@ async def async_entry_for(hass: HomeAssistant, media_id: str) -> dict[str, Any]:
     provider = url_playback.provider_for(hass, media_id)
     info = await provider(hass, media_id) if provider else None
     if not info:
-        raise HomeAssistantError(f"{media_id} can't be queued")
+        raise error("cannot_queue", media_id=media_id)
     return {"media_id": media_id, "title": info["title"], "thumbnail": None}
 
 
@@ -261,7 +262,7 @@ async def async_play(entity: MusicCastMediaPlayer, media_id: str) -> None:
     if media_id.startswith(f"{PREFIX}:item:"):
         index = int(media_id.rsplit(":", 1)[1])
         if not 0 <= index < len(queue):
-            raise HomeAssistantError("The queue has changed, open it again")
+            raise error("queue_changed")
         _LOGGER.info(
             "%s: playing queue item %d, dropping %d before it", entity.entity_id, index + 1, index
         )
@@ -275,7 +276,7 @@ async def async_play(entity: MusicCastMediaPlayer, media_id: str) -> None:
         entries = [_entry(c) for c in folder.children or [] if _queueable(entity.hass, c)]
         await async_enqueue(entity, entries, kind)
         return
-    raise HomeAssistantError(f"Unknown queue action {media_id}")
+    raise error("unknown_queue_action", action=media_id)
 
 
 async def async_play_next(entity: MusicCastMediaPlayer) -> bool:

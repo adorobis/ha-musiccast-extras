@@ -29,7 +29,7 @@ from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 
-from .const import DOMAIN
+from .const import DOMAIN, error
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -55,6 +55,8 @@ type MusicCastExtrasConfigEntry = ConfigEntry[dict[str, MusicCastExtrasDevice]]
 
 # host -> device, for the media player patch (filled while the entry is loaded)
 REGISTRY: dict[str, MusicCastExtrasDevice] = {}
+# Sent with a device added after setup (a MusicCast entry that loaded later).
+SIGNAL_NEW_DEVICE = f"{DOMAIN}_new_device"
 
 
 class MusicCastApiError(HomeAssistantError):
@@ -133,6 +135,8 @@ class MusicCastExtrasDevice(DataUpdateCoordinator[dict[str, Any]]):
         self._unsub_url: Any = None
         self.web_path = "/"
         self._failures = 0
+        # Sent when the device goes away: its entities remove themselves.
+        self.removed_signal = f"{DOMAIN}_removed_{id(self)}"
         super().__init__(
             hass,
             _LOGGER,
@@ -163,10 +167,10 @@ class MusicCastExtrasDevice(DataUpdateCoordinator[dict[str, Any]]):
     def _check(path: str, result: Any) -> dict[str, Any]:
         """Return the answer, raise if it isn't one or reports an error code."""
         if not isinstance(result, dict):
-            raise MusicCastApiError(f"{path}: unexpected answer")
+            raise error("unexpected_answer", MusicCastApiError, path=path)
         code = result.get("response_code", 0)
         if code != 0:
-            raise MusicCastApiError(f"{path}: response code {code}")
+            raise error("response_code", MusicCastApiError, path=path, code=code)
         return result
 
     async def command(self, path: str, data: dict[str, Any] | None = None) -> None:
@@ -179,7 +183,9 @@ class MusicCastExtrasDevice(DataUpdateCoordinator[dict[str, Any]]):
         except MusicCastApiError:
             raise
         except Exception as err:
-            raise HomeAssistantError(f"{self.model} ({self.host}): {path} failed: {err}") from err
+            raise error(
+                "command_failed", model=self.model, host=self.host, path=path, error=err
+            ) from err
         await self.async_refresh()
 
     # ------------------------------------------------------------ polling
@@ -219,8 +225,13 @@ class MusicCastExtrasDevice(DataUpdateCoordinator[dict[str, Any]]):
                     TOLERATED_FAILURES,
                 )
                 return self.data
-            raise UpdateFailed(
-                f"{self.model} ({self.host}): {reason} ({self._failures} refreshes in a row)"
+            raise error(
+                "update_failed",
+                UpdateFailed,
+                model=self.model,
+                host=self.host,
+                reason=reason,
+                count=self._failures,
             ) from err
         if self._failures:
             _LOGGER.debug("%s (%s): refresh works again", self.model, self.host)
@@ -400,18 +411,26 @@ async def async_create_devices(
     """Create a MusicCastExtrasDevice for every loaded MusicCast entry."""
     devices: dict[str, MusicCastExtrasDevice] = {}
     for entry in hass.config_entries.async_loaded_entries(MUSICCAST_DOMAIN):
-        core = entry.runtime_data
-        try:
-            raw = await core.musiccast.device.request_json(API + "system/getFeatures")
-        except MusicCastException as err:
-            _LOGGER.warning("Skipping %s: no features (%s)", entry.title, err)
-            continue
-        device = MusicCastExtrasDevice(hass, extras_entry, core, Features.parse(raw))
-        await device.async_refresh()
-        if not device.last_update_success:
-            _LOGGER.warning("Skipping %s: could not read its state", entry.title)
-            continue
-        await device.async_find_web_page()
-        device.async_start_events()
-        devices[device.host] = device
+        if device := await async_create_device(hass, extras_entry, entry):
+            devices[device.host] = device
     return devices
+
+
+async def async_create_device(
+    hass: HomeAssistant, extras_entry: MusicCastExtrasConfigEntry, core_entry: ConfigEntry
+) -> MusicCastExtrasDevice | None:
+    """Create the MusicCastExtrasDevice of a loaded MusicCast entry, None if it can't be read."""
+    core = core_entry.runtime_data
+    try:
+        raw = await core.musiccast.device.request_json(API + "system/getFeatures")
+    except MusicCastException as err:
+        _LOGGER.warning("Skipping %s: no features (%s)", core_entry.title, err)
+        return None
+    device = MusicCastExtrasDevice(hass, extras_entry, core, Features.parse(raw))
+    await device.async_refresh()
+    if not device.last_update_success:
+        _LOGGER.warning("Skipping %s: could not read its state", core_entry.title)
+        return None
+    await device.async_find_web_page()
+    device.async_start_events()
+    return device

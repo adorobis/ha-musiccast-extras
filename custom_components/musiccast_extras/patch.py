@@ -34,6 +34,7 @@ from homeassistant.components.media_player import (
 from homeassistant.exceptions import HomeAssistantError
 
 from . import browse, coordinator as extras_device, library, url_playback, url_queue
+from .const import error
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -206,7 +207,7 @@ def apply() -> None:
                 result = url_queue.decorate(self, result)
             return result
         if self.state == MediaPlayerState.OFF:
-            raise HomeAssistantError("The device has to be turned on to be able to browse media.")
+            raise error("off_browse")
         return await browse.async_browse(self.coordinator.musiccast, self._zone_id, our_id)
 
     async def async_play_media(self, media_type, media_id, **kwargs):
@@ -226,9 +227,7 @@ def apply() -> None:
         if enqueue in (MediaPlayerEnqueue.NEXT, MediaPlayerEnqueue.ADD):
             # "Play next" / "Add to queue": only items of the device's lists.
             if not browse.is_our_id(media_id):
-                raise HomeAssistantError(
-                    "Only items browsed from the device's own sources can be queued"
-                )
+                raise error("queue_only_device_items")
             if self.state == MediaPlayerState.OFF:
                 await self.async_turn_on()
             kind = "play_next" if enqueue == MediaPlayerEnqueue.NEXT else "add_to_queue"
@@ -273,9 +272,9 @@ def apply() -> None:
         else:
             source = SEARCH_FALLBACK
         if source not in PATH_INPUTS:
-            raise SearchError(f"Search is not supported for {source}")
+            raise error("search_unsupported", SearchError, source=source)
         if self.state == MediaPlayerState.OFF:
-            raise SearchError("The device has to be turned on to search.")
+            raise error("off_search", SearchError)
         return await browse.async_search(
             self.coordinator.musiccast,
             self._zone_id,
@@ -301,7 +300,7 @@ def apply() -> None:
     async def async_media_seek(self, position: float) -> None:
         rec = url_playback.is_current(self)
         if not rec or not rec["seekable"]:
-            raise HomeAssistantError("Seeking is only supported for pushed media with metadata")
+            raise error("seek_unsupported")
         await url_playback.async_seek(self, position)
 
     def media_duration(self):
