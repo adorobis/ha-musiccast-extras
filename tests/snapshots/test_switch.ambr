@@ -1,0 +1,407 @@
+# serializer version: 1
+# name: test_entities[switch.kitchen_alarm-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': None,
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'cd_id')]>,
+    'disabled_by': None,
+    'domain': 'switch',
+    'entity_category': None,
+    'entity_id': 'switch.kitchen_alarm',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Alarm',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': 'mdi:alarm',
+    'original_name': 'Alarm',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'alarm_on',
+    'unique_id': 'cd_id_alarm_on',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[switch.kitchen_alarm-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Kitchen Alarm',
+      <EntityStateAttribute.ICON: 'icon'>: 'mdi:alarm',
+    }),
+    'context': <ANY>,
+    'entity_id': 'switch.kitchen_alarm',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'on',
+  })
+# ---
+# name: test_entities[switch.kitchen_alarm_beep-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': None,
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'cd_id')]>,
+    'disabled_by': None,
+    'domain': 'switch',
+    'entity_category': None,
+    'entity_id': 'switch.kitchen_alarm_beep',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Alarm beep',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': 'mdi:alarm',
+    'original_name': 'Alarm beep',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'alarm_beep',
+    'unique_id': 'cd_id_alarm_beep',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[switch.kitchen_alarm_beep-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Kitchen Alarm beep',
+      <EntityStateAttribute.ICON: 'icon'>: 'mdi:alarm',
+    }),
+    'context': <ANY>,
+    'entity_id': 'switch.kitchen_alarm_beep',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'off',
+  })
+# ---
+# name: test_entities[switch.kitchen_alarm_enabled-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': None,
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'cd_id')]>,
+    'disabled_by': None,
+    'domain': 'switch',
+    'entity_category': None,
+    'entity_id': 'switch.kitchen_alarm_enabled',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Alarm enabled',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': 'mdi:alarm',
+    'original_name': 'Alarm enabled',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'alarm_enabled',
+    'unique_id': 'cd_id_alarm_enabled',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[switch.kitchen_alarm_enabled-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Kitchen Alarm enabled',
+      <EntityStateAttribute.ICON: 'icon'>: 'mdi:alarm',
+    }),
+    'context': <ANY>,
+    'entity_id': 'switch.kitchen_alarm_enabled',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'on',
+  })
+# ---
+# name: test_entities[switch.kitchen_alarm_snooze-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': None,
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'cd_id')]>,
+    'disabled_by': None,
+    'domain': 'switch',
+    'entity_category': None,
+    'entity_id': 'switch.kitchen_alarm_snooze',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Alarm snooze',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': 'mdi:alarm',
+    'original_name': 'Alarm snooze',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'alarm_snooze',
+    'unique_id': 'cd_id_alarm_snooze',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[switch.kitchen_alarm_snooze-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Kitchen Alarm snooze',
+      <EntityStateAttribute.ICON: 'icon'>: 'mdi:alarm',
+    }),
+    'context': <ANY>,
+    'entity_id': 'switch.kitchen_alarm_snooze',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'off',
+  })
+# ---
+# name: test_entities[switch.kitchen_mono-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': None,
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'cd_id')]>,
+    'disabled_by': None,
+    'domain': 'switch',
+    'entity_category': None,
+    'entity_id': 'switch.kitchen_mono',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Mono',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'Mono',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'mono',
+    'unique_id': 'cd_id_mono',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[switch.kitchen_mono-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Kitchen Mono',
+    }),
+    'context': <ANY>,
+    'entity_id': 'switch.kitchen_mono',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'off',
+  })
+# ---
+# name: test_entities[switch.living_room_hdmi_out_1-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': None,
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'receiver_id')]>,
+    'disabled_by': None,
+    'domain': 'switch',
+    'entity_category': <EntityCategory.CONFIG: 'config'>,
+    'entity_id': 'switch.living_room_hdmi_out_1',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'HDMI out 1',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': 'mdi:video-input-hdmi',
+    'original_name': 'HDMI out 1',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'hdmi_out',
+    'unique_id': 'receiver_id_hdmi_out_1',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[switch.living_room_hdmi_out_1-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room HDMI out 1',
+      <EntityStateAttribute.ICON: 'icon'>: 'mdi:video-input-hdmi',
+    }),
+    'context': <ANY>,
+    'entity_id': 'switch.living_room_hdmi_out_1',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'on',
+  })
+# ---
+# name: test_entities[switch.living_room_hdmi_out_2-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': None,
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'receiver_id')]>,
+    'disabled_by': None,
+    'domain': 'switch',
+    'entity_category': <EntityCategory.CONFIG: 'config'>,
+    'entity_id': 'switch.living_room_hdmi_out_2',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'HDMI out 2',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': 'mdi:video-input-hdmi',
+    'original_name': 'HDMI out 2',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'hdmi_out',
+    'unique_id': 'receiver_id_hdmi_out_2',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[switch.living_room_hdmi_out_2-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room HDMI out 2',
+      <EntityStateAttribute.ICON: 'icon'>: 'mdi:video-input-hdmi',
+    }),
+    'context': <ANY>,
+    'entity_id': 'switch.living_room_hdmi_out_2',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'off',
+  })
+# ---
+# name: test_entities[switch.living_room_surround_ai-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': None,
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'receiver_id')]>,
+    'disabled_by': None,
+    'domain': 'switch',
+    'entity_category': None,
+    'entity_id': 'switch.living_room_surround_ai',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Surround:AI',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'Surround:AI',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'surround_ai',
+    'unique_id': 'receiver_id_surround_ai',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[switch.living_room_surround_ai-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room Surround:AI',
+    }),
+    'context': <ANY>,
+    'entity_id': 'switch.living_room_surround_ai',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'on',
+  })
+# ---

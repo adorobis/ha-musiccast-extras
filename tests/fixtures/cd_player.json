@@ -1,0 +1,47 @@
+{
+  "features": {
+    "response_code": 0,
+    "system": {
+      "func_list": ["network_reboot"],
+      "input_list": [
+        {"id": "net_radio", "play_info_type": "netusb"},
+        {"id": "server", "play_info_type": "netusb"},
+        {"id": "cd", "play_info_type": "cd"}
+      ]
+    },
+    "zone": [{"id": "main", "func_list": ["power", "volume", "mono"]}],
+    "clock": {
+      "func_list": ["alarm", "snooze"],
+      "range_step": [{"id": "alarm_volume", "min": 0, "max": 60, "step": 1}],
+      "alarm_input_list": ["none", "net_radio", "cd"]
+    },
+    "netusb": {"func_list": [], "preset": {"num": 40}}
+  },
+  "responses": {
+    "main/getStatus": {"power": "on", "input": "cd", "mono": false},
+    "system/getFuncStatus": {},
+    "system/getNetworkStatus": {
+      "network_name": "Kitchen",
+      "connection": "wireless_lan",
+      "ip_address": "192.168.1.20",
+      "mac_address": {"wired_lan": "AABBCCDDEE11", "wireless_lan": "AABBCCDDEE12"},
+      "wireless_lan": {"ssid": "Home", "ch": 6, "strength": 75}
+    },
+    "clock/getSettings": {
+      "alarm": {
+        "alarm_on": true,
+        "volume": 20,
+        "oneday": {"enable": true, "time": "0715", "beep": false, "snooze": false, "resume": {"input": "net_radio"}}
+      }
+    },
+    "cd/getPlayInfo": {
+      "playback": "play",
+      "track": "CD Song",
+      "artist": "CD Band",
+      "album": "CD Album",
+      "play_time": 42,
+      "total_time": 200
+    },
+    "netusb/getPlayInfo": {"input": "server", "playback": "stop", "track": ""}
+  }
+}

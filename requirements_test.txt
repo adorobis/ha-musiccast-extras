@@ -1,0 +1,4 @@
+# Test requirements; keep pytest-homeassistant at the Home Assistant version tested against.
+# The core yamaha_musiccast requirements come from scripts/ha_requirements.py.
+pytest-homeassistant==2026.11.3
+pytest-cov==7.1.0

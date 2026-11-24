@@ -1,0 +1,844 @@
+# serializer version: 1
+# name: test_entities[sensor.kitchen_connection-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SensorEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'wired_lan',
+        'wireless_lan',
+        'wireless_direct',
+        'extend_1',
+        'extend_2',
+        'extend_3',
+      ]),
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'cd_id')]>,
+    'disabled_by': None,
+    'domain': 'sensor',
+    'entity_category': <EntityCategory.DIAGNOSTIC: 'diagnostic'>,
+    'entity_id': 'sensor.kitchen_connection',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Connection',
+    'options': dict({
+    }),
+    'original_device_class': <SensorDeviceClass.ENUM: 'enum'>,
+    'original_icon': 'mdi:lan-connect',
+    'original_name': 'Connection',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'connection',
+    'unique_id': 'cd_id_connection',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[sensor.kitchen_connection-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.DEVICE_CLASS: 'device_class'>: 'enum',
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Kitchen Connection',
+      <EntityStateAttribute.ICON: 'icon'>: 'mdi:lan-connect',
+      <SensorEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'wired_lan',
+        'wireless_lan',
+        'wireless_direct',
+        'extend_1',
+        'extend_2',
+        'extend_3',
+      ]),
+    }),
+    'context': <ANY>,
+    'entity_id': 'sensor.kitchen_connection',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'wireless_lan',
+  })
+# ---
+# name: test_entities[sensor.kitchen_ip_address-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': None,
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'cd_id')]>,
+    'disabled_by': None,
+    'domain': 'sensor',
+    'entity_category': <EntityCategory.DIAGNOSTIC: 'diagnostic'>,
+    'entity_id': 'sensor.kitchen_ip_address',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'IP address',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': 'mdi:ip-network',
+    'original_name': 'IP address',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'ip_address',
+    'unique_id': 'cd_id_ip_address',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[sensor.kitchen_ip_address-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Kitchen IP address',
+      <EntityStateAttribute.ICON: 'icon'>: 'mdi:ip-network',
+      'network_name': 'Kitchen',
+      'web_settings': 'http://192.168.1.20/',
+    }),
+    'context': <ANY>,
+    'entity_id': 'sensor.kitchen_ip_address',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': '192.168.1.20',
+  })
+# ---
+# name: test_entities[sensor.kitchen_mac_address-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': None,
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'cd_id')]>,
+    'disabled_by': None,
+    'domain': 'sensor',
+    'entity_category': <EntityCategory.DIAGNOSTIC: 'diagnostic'>,
+    'entity_id': 'sensor.kitchen_mac_address',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'MAC address',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': 'mdi:network-outline',
+    'original_name': 'MAC address',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'mac_address',
+    'unique_id': 'cd_id_mac_address',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[sensor.kitchen_mac_address-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Kitchen MAC address',
+      <EntityStateAttribute.ICON: 'icon'>: 'mdi:network-outline',
+      'wired_lan': 'AABBCCDDEE11',
+      'wireless_lan': 'AABBCCDDEE12',
+    }),
+    'context': <ANY>,
+    'entity_id': 'sensor.kitchen_mac_address',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'aa:bb:cc:dd:ee:12',
+  })
+# ---
+# name: test_entities[sensor.kitchen_wi_fi_signal-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SensorEntityCapabilityAttribute.STATE_CLASS: 'state_class'>: <SensorStateClass.MEASUREMENT: 'measurement'>,
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'cd_id')]>,
+    'disabled_by': None,
+    'domain': 'sensor',
+    'entity_category': <EntityCategory.DIAGNOSTIC: 'diagnostic'>,
+    'entity_id': 'sensor.kitchen_wi_fi_signal',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Wi-Fi signal',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': 'mdi:wifi',
+    'original_name': 'Wi-Fi signal',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'wifi_signal',
+    'unique_id': 'cd_id_wifi_signal',
+    'unit_of_measurement': '%',
+  })
+# ---
+# name: test_entities[sensor.kitchen_wi_fi_signal-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      'channel': 6,
+      'connection': 'wireless_lan',
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Kitchen Wi-Fi signal',
+      <EntityStateAttribute.ICON: 'icon'>: 'mdi:wifi',
+      'ssid': 'Home',
+      <SensorEntityCapabilityAttribute.STATE_CLASS: 'state_class'>: <SensorStateClass.MEASUREMENT: 'measurement'>,
+      <EntityStateAttribute.UNIT_OF_MEASUREMENT: 'unit_of_measurement'>: '%',
+    }),
+    'context': <ANY>,
+    'entity_id': 'sensor.kitchen_wi_fi_signal',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': '75',
+  })
+# ---
+# name: test_entities[sensor.living_room_audio_format-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': None,
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'receiver_id')]>,
+    'disabled_by': None,
+    'domain': 'sensor',
+    'entity_category': None,
+    'entity_id': 'sensor.living_room_audio_format',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Audio format',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'Audio format',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'signal_format',
+    'unique_id': 'receiver_id_signal_format',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[sensor.living_room_audio_format-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room Audio format',
+    }),
+    'context': <ANY>,
+    'entity_id': 'sensor.living_room_audio_format',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'PCM',
+  })
+# ---
+# name: test_entities[sensor.living_room_bit_depth-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': None,
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'receiver_id')]>,
+    'disabled_by': None,
+    'domain': 'sensor',
+    'entity_category': None,
+    'entity_id': 'sensor.living_room_bit_depth',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Bit depth',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'Bit depth',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'signal_bit_depth',
+    'unique_id': 'receiver_id_signal_bit_depth',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[sensor.living_room_bit_depth-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room Bit depth',
+    }),
+    'context': <ANY>,
+    'entity_id': 'sensor.living_room_bit_depth',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': '16 bit',
+  })
+# ---
+# name: test_entities[sensor.living_room_bitrate-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SensorEntityCapabilityAttribute.STATE_CLASS: 'state_class'>: <SensorStateClass.MEASUREMENT: 'measurement'>,
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'receiver_id')]>,
+    'disabled_by': None,
+    'domain': 'sensor',
+    'entity_category': None,
+    'entity_id': 'sensor.living_room_bitrate',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Bitrate',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'Bitrate',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'signal_bitrate',
+    'unique_id': 'receiver_id_signal_bitrate',
+    'unit_of_measurement': <UnitOfDataRate.KILOBITS_PER_SECOND: 'kbit/s'>,
+  })
+# ---
+# name: test_entities[sensor.living_room_bitrate-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room Bitrate',
+      <SensorEntityCapabilityAttribute.STATE_CLASS: 'state_class'>: <SensorStateClass.MEASUREMENT: 'measurement'>,
+      <EntityStateAttribute.UNIT_OF_MEASUREMENT: 'unit_of_measurement'>: <UnitOfDataRate.KILOBITS_PER_SECOND: 'kbit/s'>,
+    }),
+    'context': <ANY>,
+    'entity_id': 'sensor.living_room_bitrate',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'unknown',
+  })
+# ---
+# name: test_entities[sensor.living_room_connection-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SensorEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'wired_lan',
+        'wireless_lan',
+        'wireless_direct',
+        'extend_1',
+        'extend_2',
+        'extend_3',
+      ]),
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'receiver_id')]>,
+    'disabled_by': None,
+    'domain': 'sensor',
+    'entity_category': <EntityCategory.DIAGNOSTIC: 'diagnostic'>,
+    'entity_id': 'sensor.living_room_connection',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Connection',
+    'options': dict({
+    }),
+    'original_device_class': <SensorDeviceClass.ENUM: 'enum'>,
+    'original_icon': 'mdi:lan-connect',
+    'original_name': 'Connection',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'connection',
+    'unique_id': 'receiver_id_connection',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[sensor.living_room_connection-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.DEVICE_CLASS: 'device_class'>: 'enum',
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room Connection',
+      <EntityStateAttribute.ICON: 'icon'>: 'mdi:lan-connect',
+      <SensorEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'wired_lan',
+        'wireless_lan',
+        'wireless_direct',
+        'extend_1',
+        'extend_2',
+        'extend_3',
+      ]),
+    }),
+    'context': <ANY>,
+    'entity_id': 'sensor.living_room_connection',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'wired_lan',
+  })
+# ---
+# name: test_entities[sensor.living_room_ip_address-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': None,
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'receiver_id')]>,
+    'disabled_by': None,
+    'domain': 'sensor',
+    'entity_category': <EntityCategory.DIAGNOSTIC: 'diagnostic'>,
+    'entity_id': 'sensor.living_room_ip_address',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'IP address',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': 'mdi:ip-network',
+    'original_name': 'IP address',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'ip_address',
+    'unique_id': 'receiver_id_ip_address',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[sensor.living_room_ip_address-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      'default_gateway': '192.168.1.1',
+      'dhcp': True,
+      'dns_server_1': '192.168.1.1',
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room IP address',
+      <EntityStateAttribute.ICON: 'icon'>: 'mdi:ip-network',
+      'network_name': 'Living room',
+      'subnet_mask': '255.255.255.0',
+      'web_settings': 'http://192.168.1.10/',
+      'web_setup': 'http://192.168.1.10/Setup/',
+    }),
+    'context': <ANY>,
+    'entity_id': 'sensor.living_room_ip_address',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': '192.168.1.10',
+  })
+# ---
+# name: test_entities[sensor.living_room_mac_address-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': None,
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'receiver_id')]>,
+    'disabled_by': None,
+    'domain': 'sensor',
+    'entity_category': <EntityCategory.DIAGNOSTIC: 'diagnostic'>,
+    'entity_id': 'sensor.living_room_mac_address',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'MAC address',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': 'mdi:network-outline',
+    'original_name': 'MAC address',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'mac_address',
+    'unique_id': 'receiver_id_mac_address',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[sensor.living_room_mac_address-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room MAC address',
+      <EntityStateAttribute.ICON: 'icon'>: 'mdi:network-outline',
+      'wired_lan': 'AABBCCDDEE01',
+      'wireless_lan': 'AABBCCDDEE02',
+    }),
+    'context': <ANY>,
+    'entity_id': 'sensor.living_room_mac_address',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'aa:bb:cc:dd:ee:01',
+  })
+# ---
+# name: test_entities[sensor.living_room_sample_rate-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': None,
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'receiver_id')]>,
+    'disabled_by': None,
+    'domain': 'sensor',
+    'entity_category': None,
+    'entity_id': 'sensor.living_room_sample_rate',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Sample rate',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'Sample rate',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'signal_sample_rate',
+    'unique_id': 'receiver_id_signal_sample_rate',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[sensor.living_room_sample_rate-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room Sample rate',
+    }),
+    'context': <ANY>,
+    'entity_id': 'sensor.living_room_sample_rate',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': '44.1 kHz',
+  })
+# ---
+# name: test_entities[sensor.living_room_signal_error-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SensorEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'none',
+        'unknown',
+        'check_cable',
+        'check_pc',
+        'disconnected',
+        'over_fs',
+      ]),
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'receiver_id')]>,
+    'disabled_by': None,
+    'domain': 'sensor',
+    'entity_category': <EntityCategory.DIAGNOSTIC: 'diagnostic'>,
+    'entity_id': 'sensor.living_room_signal_error',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Signal error',
+    'options': dict({
+    }),
+    'original_device_class': 'enum',
+    'original_icon': None,
+    'original_name': 'Signal error',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'signal_error',
+    'unique_id': 'receiver_id_signal_error',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[sensor.living_room_signal_error-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.DEVICE_CLASS: 'device_class'>: 'enum',
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room Signal error',
+      <SensorEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'none',
+        'unknown',
+        'check_cable',
+        'check_pc',
+        'disconnected',
+        'over_fs',
+      ]),
+    }),
+    'context': <ANY>,
+    'entity_id': 'sensor.living_room_signal_error',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'none',
+  })
+# ---
+# name: test_entities[sensor.living_room_tuner_band-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': None,
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'receiver_id')]>,
+    'disabled_by': None,
+    'domain': 'sensor',
+    'entity_category': None,
+    'entity_id': 'sensor.living_room_tuner_band',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Tuner band',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': 'mdi:radio',
+    'original_name': 'Tuner band',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'tuner_band',
+    'unique_id': 'receiver_id_tuner_band',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[sensor.living_room_tuner_band-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room Tuner band',
+      <EntityStateAttribute.ICON: 'icon'>: 'mdi:radio',
+    }),
+    'context': <ANY>,
+    'entity_id': 'sensor.living_room_tuner_band',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'DAB',
+  })
+# ---
+# name: test_entities[sensor.living_room_tuner_station-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': None,
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'receiver_id')]>,
+    'disabled_by': None,
+    'domain': 'sensor',
+    'entity_category': None,
+    'entity_id': 'sensor.living_room_tuner_station',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Tuner station',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': 'mdi:radio',
+    'original_name': 'Tuner station',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'tuner_station',
+    'unique_id': 'receiver_id_tuner_station',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[sensor.living_room_tuner_station-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      'bit_rate': 128,
+      'dab_plus': True,
+      'ensemble': 'MUX 1',
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room Tuner station',
+      <EntityStateAttribute.ICON: 'icon'>: 'mdi:radio',
+      'program_type': 'Pop',
+      'quality': 90,
+    }),
+    'context': <ANY>,
+    'entity_id': 'sensor.living_room_tuner_station',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'Radio Example',
+  })
+# ---
+# name: test_entities[sensor.living_room_tuner_text-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': None,
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'receiver_id')]>,
+    'disabled_by': None,
+    'domain': 'sensor',
+    'entity_category': None,
+    'entity_id': 'sensor.living_room_tuner_text',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Tuner text',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': 'mdi:radio',
+    'original_name': 'Tuner text',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'tuner_text',
+    'unique_id': 'receiver_id_tuner_text',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[sensor.living_room_tuner_text-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room Tuner text',
+      <EntityStateAttribute.ICON: 'icon'>: 'mdi:radio',
+    }),
+    'context': <ANY>,
+    'entity_id': 'sensor.living_room_tuner_text',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'Now: Some Song',
+  })
+# ---

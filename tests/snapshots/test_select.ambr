@@ -1,0 +1,432 @@
+# serializer version: 1
+# name: test_entities[select.kitchen_alarm_source-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'none',
+        'net_radio',
+        'cd',
+      ]),
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'cd_id')]>,
+    'disabled_by': None,
+    'domain': 'select',
+    'entity_category': None,
+    'entity_id': 'select.kitchen_alarm_source',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Alarm source',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': 'mdi:alarm',
+    'original_name': 'Alarm source',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'alarm_source',
+    'unique_id': 'cd_id_alarm_source',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[select.kitchen_alarm_source-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Kitchen Alarm source',
+      <EntityStateAttribute.ICON: 'icon'>: 'mdi:alarm',
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'none',
+        'net_radio',
+        'cd',
+      ]),
+    }),
+    'context': <ANY>,
+    'entity_id': 'select.kitchen_alarm_source',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'net_radio',
+  })
+# ---
+# name: test_entities[select.kitchen_preset_name-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'Album 3 [TIDAL]',
+        'Album 3 [NET RADIO]',
+        'Mix',
+      ]),
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'cd_id')]>,
+    'disabled_by': None,
+    'domain': 'select',
+    'entity_category': None,
+    'entity_id': 'select.kitchen_preset_name',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Preset name',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': 'mdi:star-box-multiple-outline',
+    'original_name': 'Preset name',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'preset_select',
+    'unique_id': 'cd_id_preset_select',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[select.kitchen_preset_name-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Kitchen Preset name',
+      <EntityStateAttribute.ICON: 'icon'>: 'mdi:star-box-multiple-outline',
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'Album 3 [TIDAL]',
+        'Album 3 [NET RADIO]',
+        'Mix',
+      ]),
+      'preset_number': 0,
+    }),
+    'context': <ANY>,
+    'entity_id': 'select.kitchen_preset_name',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'unknown',
+  })
+# ---
+# name: test_entities[select.living_room_auro_3d_listening_mode-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'auro_3d',
+        'auro_matic',
+      ]),
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'receiver_id')]>,
+    'disabled_by': None,
+    'domain': 'select',
+    'entity_category': <EntityCategory.CONFIG: 'config'>,
+    'entity_id': 'select.living_room_auro_3d_listening_mode',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Auro-3D listening mode',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'Auro-3D listening mode',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'auro_listening_mode',
+    'unique_id': 'receiver_id_auro_listening_mode',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[select.living_room_auro_3d_listening_mode-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room Auro-3D listening mode',
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'auro_3d',
+        'auro_matic',
+      ]),
+    }),
+    'context': <ANY>,
+    'entity_id': 'select.living_room_auro_3d_listening_mode',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'auro_3d',
+  })
+# ---
+# name: test_entities[select.living_room_auro_matic_preset-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'small',
+        'medium',
+        'large',
+      ]),
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'receiver_id')]>,
+    'disabled_by': None,
+    'domain': 'select',
+    'entity_category': <EntityCategory.CONFIG: 'config'>,
+    'entity_id': 'select.living_room_auro_matic_preset',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Auro-Matic preset',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': None,
+    'original_name': 'Auro-Matic preset',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'auro_matic_preset',
+    'unique_id': 'receiver_id_auro_matic_preset',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[select.living_room_auro_matic_preset-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room Auro-Matic preset',
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'small',
+        'medium',
+        'large',
+      ]),
+    }),
+    'context': <ANY>,
+    'entity_id': 'select.living_room_auro_matic_preset',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'medium',
+  })
+# ---
+# name: test_entities[select.living_room_preset_name-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'Album 3 [TIDAL]',
+        'Album 3 [NET RADIO]',
+        'Mix',
+      ]),
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'receiver_id')]>,
+    'disabled_by': None,
+    'domain': 'select',
+    'entity_category': None,
+    'entity_id': 'select.living_room_preset_name',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Preset name',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': 'mdi:star-box-multiple-outline',
+    'original_name': 'Preset name',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'preset_select',
+    'unique_id': 'receiver_id_preset_select',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[select.living_room_preset_name-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room Preset name',
+      <EntityStateAttribute.ICON: 'icon'>: 'mdi:star-box-multiple-outline',
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'Album 3 [TIDAL]',
+        'Album 3 [NET RADIO]',
+        'Mix',
+      ]),
+      'preset_number': 1,
+    }),
+    'context': <ANY>,
+    'entity_id': 'select.living_room_preset_name',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'Album 3 [TIDAL]',
+  })
+# ---
+# name: test_entities[select.living_room_speaker_pattern-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        '1',
+        '2',
+      ]),
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'receiver_id')]>,
+    'disabled_by': None,
+    'domain': 'select',
+    'entity_category': <EntityCategory.CONFIG: 'config'>,
+    'entity_id': 'select.living_room_speaker_pattern',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Speaker pattern',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': 'mdi:speaker-multiple',
+    'original_name': 'Speaker pattern',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'speaker_pattern',
+    'unique_id': 'receiver_id_speaker_pattern',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[select.living_room_speaker_pattern-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Living room Speaker pattern',
+      <EntityStateAttribute.ICON: 'icon'>: 'mdi:speaker-multiple',
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        '1',
+        '2',
+      ]),
+    }),
+    'context': <ANY>,
+    'entity_id': 'select.living_room_speaker_pattern',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': '1',
+  })
+# ---
+# name: test_entities[select.terrace_preset_name-entry]
+  EntityRegistryEntrySnapshot({
+    'aliases': list([
+      None,
+    ]),
+    'area_id': None,
+    'capabilities': dict({
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'Album 3 [TIDAL]',
+        'Album 3 [NET RADIO]',
+        'Mix',
+      ]),
+    }),
+    'config_entry_id': <ANY>,
+    'config_subentry_id': None,
+    'device_class': None,
+    'device_id': <DeviceEntry identifiers=[('yamaha_musiccast', 'receiver_id_zone2')]>,
+    'disabled_by': None,
+    'domain': 'select',
+    'entity_category': None,
+    'entity_id': 'select.terrace_preset_name',
+    'has_entity_name': True,
+    'hidden_by': None,
+    'icon': None,
+    'id': <ANY>,
+    'labels': set({
+    }),
+    'name': None,
+    'object_id_base': 'Preset name',
+    'options': dict({
+    }),
+    'original_device_class': None,
+    'original_icon': 'mdi:star-box-multiple-outline',
+    'original_name': 'Preset name',
+    'platform': 'musiccast_extras',
+    'previous_unique_id': None,
+    'suggested_object_id': None,
+    'supported_features': 0,
+    'translation_key': 'preset_select',
+    'unique_id': 'receiver_id_zone2_preset_select',
+    'unit_of_measurement': None,
+  })
+# ---
+# name: test_entities[select.terrace_preset_name-state]
+  StateSnapshot({
+    'attributes': ReadOnlyDict({
+      <EntityStateAttribute.FRIENDLY_NAME: 'friendly_name'>: 'Terrace Preset name',
+      <EntityStateAttribute.ICON: 'icon'>: 'mdi:star-box-multiple-outline',
+      <SelectEntityCapabilityAttribute.OPTIONS: 'options'>: list([
+        'Album 3 [TIDAL]',
+        'Album 3 [NET RADIO]',
+        'Mix',
+      ]),
+      'preset_number': 0,
+    }),
+    'context': <ANY>,
+    'entity_id': 'select.terrace_preset_name',
+    'last_changed': <ANY>,
+    'last_reported': <ANY>,
+    'last_updated': <ANY>,
+    'state': 'unknown',
+  })
+# ---

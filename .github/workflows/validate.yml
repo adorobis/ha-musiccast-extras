@@ -38,6 +38,18 @@ jobs:
           version: "0.14.4"
       - run: ruff format --check
 
+  tests:
+    name: Tests
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+      - uses: actions/setup-python@v6
+        with:
+          python-version: "3.14"
+      - run: pip install -r requirements_test.txt
+      - run: pip install $(python scripts/ha_requirements.py)
+      - run: pytest --cov --cov-report=term-missing --cov-fail-under=95
+
   compat:
     # The integration patches the core yamaha_musiccast media player; check
     # that the newest Home Assistant still has everything it relies on.

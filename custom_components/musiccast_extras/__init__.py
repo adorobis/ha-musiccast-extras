@@ -133,6 +133,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     entry.runtime_data = devices
     _migrate_registry(hass, entry, devices)
     extras_device.REGISTRY.update(devices)
+    for device in devices.values():
+        # Show what the patch adds (CD track, seeking, ...) without waiting for
+        # the core players' next update.
+        device.core.async_update_listeners()
     _LOGGER.info("Extra entities for %d MusicCast device(s)", len(devices))
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True

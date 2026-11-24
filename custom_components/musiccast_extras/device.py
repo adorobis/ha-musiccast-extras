@@ -232,7 +232,15 @@ class MusicCastExtrasDevice(DataUpdateCoordinator[dict[str, Any]]):
         self.musiccast.register_callback(_on_event)
         self._unsub_event = _on_event
         self.async_update_configuration_url()
-        self._unsub_url = self.async_add_listener(self.async_update_configuration_url)
+        self._unsub_url = self.async_add_listener(self._async_on_update)
+
+    @callback
+    def _async_on_update(self) -> None:
+        self.async_update_configuration_url()
+        if "cd" in self.features.inputs:
+            # The patched media player shows the CD's track and transport from
+            # this data, which arrives after the core player wrote its state.
+            self.core.async_update_listeners()
 
     @callback
     def async_stop_events(self) -> None:
@@ -307,7 +315,7 @@ class MusicCastExtrasDevice(DataUpdateCoordinator[dict[str, Any]]):
         """
         core = self.core.data
         zone = core.zones.get(zone_id)
-        if zone is None or not zone.power:
+        if zone is None or zone.power != "on":
             return 0, None
         source = zone.input
         if (

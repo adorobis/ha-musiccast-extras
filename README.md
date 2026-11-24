@@ -293,6 +293,22 @@ async def async_media_info(hass, media_content_id: str) -> dict | None:
 The speaker fetches the image itself, without Home Assistant credentials, so the image URL
 must not require authentication.
 
+### Tests
+
+The tests set up the core Yamaha MusicCast integration with aiomusiccast's device mocked,
+and a fake device API (`tests/conftest.py`) that answers from the JSON fixtures in
+`tests/fixtures` and records every request, so they run without any MusicCast device:
+
+```bash
+python3.14 -m venv .venv && . .venv/bin/activate
+pip install -r requirements_test.txt
+pip install $(python scripts/ha_requirements.py)
+pytest --cov
+```
+
+After a change to what the entities show, update the snapshots with
+`pytest --snapshot-update` and review the diff of `tests/snapshots`.
+
 ## Notes
 
 - Some settings use API calls that are newer than the published Yamaha specification (Surround:AI,

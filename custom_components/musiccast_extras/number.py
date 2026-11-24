@@ -155,7 +155,7 @@ class PresetNumber(MusicCastExtrasEntity, NumberEntity):
 
     def _match(self) -> tuple[int, str | None]:
         zone = self.device.core.data.zones.get(self.zone_id)
-        if zone is not None and zone.power and zone.input == "tuner":
+        if zone is not None and zone.power == "on" and zone.input == "tuner":
             tuner = self.data.get("tuner", {})
             band = tuner.get("band") or ""
             return (tuner.get(band) or {}).get("preset") or 0, None
@@ -179,7 +179,7 @@ class PresetNumber(MusicCastExtrasEntity, NumberEntity):
             return
         zone = self.device.core.data.zones.get(self.zone_id)
         band = self.data.get("tuner", {}).get("band")
-        if zone is not None and zone.power and zone.input == "tuner" and band:
+        if zone is not None and zone.power == "on" and zone.input == "tuner" and band:
             if number > self._tuner_max:
                 raise ServiceValidationError(
                     f"The tuner has presets 1-{self._tuner_max}, not {number}"

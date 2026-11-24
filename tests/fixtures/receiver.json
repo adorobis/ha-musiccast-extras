@@ -1,0 +1,96 @@
+{
+  "features": {
+    "response_code": 0,
+    "system": {
+      "func_list": ["system_reboot", "network_reboot", "speaker_pattern", "hdmi_out_1", "hdmi_out_2"],
+      "speaker_pattern_num": 2,
+      "input_list": [
+        {"id": "tidal", "play_info_type": "netusb"},
+        {"id": "server", "play_info_type": "netusb"},
+        {"id": "net_radio", "play_info_type": "netusb"},
+        {"id": "tuner", "play_info_type": "tuner"},
+        {"id": "hdmi1", "play_info_type": "none"}
+      ]
+    },
+    "zone": [
+      {
+        "id": "main",
+        "func_list": ["power", "volume", "scene", "signal_info", "balance", "actual_volume", "surround_ai"],
+        "scene_num": 2,
+        "range_step": [
+          {"id": "balance", "min": -6, "max": 6, "step": 1},
+          {"id": "actual_volume_db", "min": -80.5, "max": 16.5, "step": 0.5},
+          {"id": "auro_matic_strength", "min": 1, "max": 16, "step": 1}
+        ],
+        "auro_3d_listening_mode_list": ["prev", "next", "auro_3d", "auro_matic"],
+        "auro_matic_preset_list": ["small", "medium", "large"]
+      },
+      {"id": "zone2", "func_list": ["power", "volume", "scene"], "scene_num": 1}
+    ],
+    "tuner": {"func_list": ["fm", "dab", "rds"], "preset": {"type": "separate", "num": 40}},
+    "netusb": {"func_list": ["recent_info", "play_queue", "mc_playlist"], "preset": {"num": 40}}
+  },
+  "responses": {
+    "main/getStatus": {
+      "power": "on",
+      "input": "tidal",
+      "balance": 0,
+      "actual_volume": {"mode": "db", "value": -30.5, "unit": "dB"},
+      "surround_ai": true,
+      "auro_3d": {"listening_mode": "auro_3d", "auro_matic_preset": "medium", "auro_matic_strength": 10}
+    },
+    "zone2/getStatus": {"power": "standby", "input": "net_radio"},
+    "main/getSignalInfo": {"audio": {"format": "PCM", "fs": "44.1 kHz", "bit": "16 bit", "bitrate": 0, "error": 0}},
+    "system/getFuncStatus": {"speaker_pattern": 1, "hdmi_out_1": true, "hdmi_out_2": false},
+    "system/getNetworkStatus": {
+      "network_name": "Living room",
+      "connection": "wired_lan",
+      "dhcp": true,
+      "ip_address": "192.168.1.10",
+      "subnet_mask": "255.255.255.0",
+      "default_gateway": "192.168.1.1",
+      "dns_server_1": "192.168.1.1",
+      "dns_server_2": "",
+      "mac_address": {"wired_lan": "AABBCCDDEE01", "wireless_lan": "AABBCCDDEE02"}
+    },
+    "tuner/getPlayInfo": {
+      "band": "dab",
+      "fm": {"preset": 2, "freq": 98400},
+      "dab": {
+        "preset": 3,
+        "service_label": "Radio Example",
+        "dls": "Now: Some Song",
+        "ensemble_label": "MUX 1",
+        "bit_rate": 128,
+        "quality": 90,
+        "dab_plus": true,
+        "program_type": "Pop"
+      },
+      "rds": {"program_service": "FM ONE ", "radio_text_a": " Hello ", "radio_text_b": ""}
+    },
+    "netusb/getRecentInfo": {
+      "recent_info": [
+        {"input": "net_radio", "text": "Radio Example", "albumart_url": "http://192.168.1.10/a.jpg"},
+        {"input": "tidal", "text": "An Album", "albumart_url": "http://resources.tidal.com:80/x.jpg"},
+        {"input": "unknown", "text": ""}
+      ]
+    },
+    "netusb/getMcPlaylistName": {"name_list": ["Party", "Chill"]},
+    "netusb/getMcPlaylist": {
+      "max_line": 2,
+      "track_info": [{"track": "First", "artist": "Band"}, {"text": "Second"}]
+    },
+    "netusb/getPlayQueue": {
+      "max_line": 2,
+      "playing_index": 1,
+      "track_info": [{"text": "Queued one"}, {"text": "Queued two", "thumbnail": "http://x/t.jpg"}]
+    },
+    "tuner/getPresetInfo": {
+      "preset_info": [
+        {"band": "fm", "number": 98400, "text": "FM ONE"},
+        {"band": "unknown", "number": 0},
+        {"band": "am", "number": 531}
+      ]
+    }
+  }
+}
