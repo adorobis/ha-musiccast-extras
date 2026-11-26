@@ -8,7 +8,8 @@ Patched on MusicCastMediaPlayer (class level, so existing entities get it):
 - async_media_next_track and enqueue: the queue of pushed media-source
   items kept in Home Assistant (url_queue.py).
 - async_media_seek, media_duration, supported_features: seeking and the
-  duration of pushed items; SEARCH_MEDIA for every browsable player.
+  duration of pushed items, seeking in netusb tracks the device allows it
+  for (any source); SEARCH_MEDIA for every browsable player.
 Path-based browsing (browse.py) covers every input the core integration
 browses (aiomusiccast's MusicCastMediaContent.BROWSABLE_INPUTS: server,
 net_radio, usb, qobuz, deezer, ...) plus Tidal, which is added to that list.
@@ -32,6 +33,7 @@ from homeassistant.components.media_player import (
     SearchMediaQuery,
 )
 from homeassistant.exceptions import HomeAssistantError
+from homeassistant.util import dt as dt_util
 
 from . import browse, coordinator as extras_device, library, url_playback, url_queue
 from .const import error
@@ -66,7 +68,7 @@ PATCHED_PROPERTIES = (
     "media_position",
     "media_position_updated_at",
 )
-ENTITY_PROPERTIES = (*PATCHED_PROPERTIES, "source_id")
+ENTITY_PROPERTIES = (*PATCHED_PROPERTIES, "source_id", "_is_netusb")
 CD_TRANSPORT = {
     "async_media_pause": "pause",
     "async_media_stop": "stop",
@@ -81,6 +83,10 @@ CD_FEATURES = (
     | MediaPlayerEntityFeature.PREVIOUS_TRACK
 )
 DEVICE_METHODS = ("select_source", "get_list_info", "return_in_list", "select_list_item")
+# Bit of the netusb getPlayInfo attribute: the track playing allows seeking
+# (netusb/setPlayPosition). aiomusiccast after 0.15.0 offers it as
+# MusicCastDevice.netusb_seekable / netusb_seek.
+NETUSB_SEEKABLE = 1 << 31
 PYAMAHA_DEVICE_METHODS = ("dlna_avt_request", "request_json")
 
 _originals: dict[str, Any] = {}
@@ -135,6 +141,36 @@ def _cd(entity: Any) -> tuple[extras_device.MusicCastExtrasDevice, dict[str, Any
         return None
     info = (ext.data or {}).get("cd")
     return (ext, info) if info is not None else None
+
+
+def _netusb_seekable(entity: Any) -> bool:
+    """Return whether the zone plays a netusb track the device can seek in.
+
+    Any netusb source (streaming services, media servers, USB) on models
+    that allow it, as the device reports in the attribute of the play info.
+    """
+    if not entity._is_netusb:
+        return False
+    musiccast = entity.coordinator.musiccast
+    if isinstance(getattr(type(musiccast), "netusb_seekable", None), property):
+        return bool(musiccast.netusb_seekable)
+    attribute = (getattr(musiccast, "_netusb_play_info", None) or {}).get("attribute")
+    return isinstance(attribute, int) and bool(attribute & NETUSB_SEEKABLE)
+
+
+async def _netusb_seek(entity: Any, position: float) -> None:
+    """Seek in the netusb track the zone plays."""
+    musiccast = entity.coordinator.musiccast
+    if callable(getattr(type(musiccast), "netusb_seek", None)):
+        await musiccast.netusb_seek(position)
+        return
+    ext = _extras(entity)
+    if ext is None:
+        raise error("seek_unsupported")
+    await ext.command(f"netusb/setPlayPosition?position={int(position)}")
+    musiccast.data.netusb_play_time = int(position)
+    musiccast.data.netusb_play_time_updated = dt_util.utcnow()
+    entity.async_write_ha_state()
 
 
 def _root_id(media_id: str | None) -> str | None:
@@ -299,9 +335,14 @@ def apply() -> None:
 
     async def async_media_seek(self, position: float) -> None:
         rec = url_playback.is_current(self)
-        if not rec or not rec["seekable"]:
+        if rec:
+            if not rec["seekable"]:
+                raise error("seek_unsupported")
+            await url_playback.async_seek(self, position)
+            return
+        if not _netusb_seekable(self):
             raise error("seek_unsupported")
-        await url_playback.async_seek(self, position)
+        await _netusb_seek(self, position)
 
     def media_duration(self):
         rec = url_playback.is_current(self)
@@ -347,7 +388,7 @@ def apply() -> None:
                 MediaPlayerEntityFeature.SEARCH_MEDIA | MediaPlayerEntityFeature.MEDIA_ENQUEUE
             )
         rec = url_playback.is_current(self)
-        if rec and rec["seekable"]:
+        if rec["seekable"] if rec else _netusb_seekable(self):
             features |= MediaPlayerEntityFeature.SEEK
         if url_queue.has_next(self):
             features |= MediaPlayerEntityFeature.NEXT_TRACK

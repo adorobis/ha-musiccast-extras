@@ -19,6 +19,7 @@ integration:
   tuner presets.
 - **Play next / Add to queue** for tracks and folders from the device's sources, right in the media
   browser.
+- **Seeking in streaming services and media servers** where the speaker allows it.
 - **CD control**: play, pause, stop, skip and track info when a zone plays the CD.
 - **Entities for what each device supports**: signal info, Wi-Fi signal, tuner station and
   RDS/DAB text, the preset playing now (by number or name, recalls the one you pick), alarm, scenes, balance, volume in dB, Surround:AI, Auro-3D, HDMI outputs,
@@ -78,6 +79,17 @@ instead sends:
 - **seeking**: drag the progress bar.
 
 If the speaker rejects the metadata, the item still plays the core way.
+
+### Seeking in streaming services and media servers
+
+The core integration offers no seeking for what a speaker plays itself (Tidal, Qobuz, Deezer, a
+media server, USB, ...). MusicCast Extras offers it whenever the speaker reports that the track
+playing allows it, whatever the source. Whether it does depends on the model and source: on a
+WX-021 and an RX-A8A (API 2.17) Tidal and media servers can be seeked, on a CD-NT670D (API 2.08)
+Tidal can't, nor can the MusicCast app seek there.
+
+For media-server tracks some speakers report no duration. Then Home Assistant shows no progress
+bar, but the `media_player.media_seek` action (e.g. in an automation or script) still works.
 
 ### Resume after a Home Assistant restart
 
@@ -375,6 +387,10 @@ Dodatki do wbudowanej integracji Yamaha MusicCast:
   najwyższym poziomie przeglądarki mediów odtwarzacza (co gra teraz i co dalej). Kolejka jest trzymana w
   HA dla każdego głośnika. Gdy odcinek dojdzie do końca, startuje następny, a przycisk „Następny”
   przeskakuje do kolejnej pozycji. Kolejka przetrwa restart HA.
+- **Przewijanie w serwisach streamingowych i na serwerach mediów** (Tidal, Qobuz, Deezer, Server,
+  USB…), gdy głośnik na to pozwala; zależy to od modelu (np. WX-021 i RX-A8A tak, CD-NT670D nie dla
+  Tidala). Jeśli głośnik nie podaje czasu trwania (niektóre serwery mediów), nie ma paska postępu,
+  ale akcja `media_player.media_seek` działa.
 - **Sterowanie CD**: odtwarzanie, pauza, stop, przewijanie utworów i informacje o płycie.
 - **Encje dla funkcji obsługiwanych przez urządzenie**: parametry sygnału (osobno format,
   częstotliwość, rozdzielczość, przepływność), sygnał Wi-Fi, stacja tunera i tekst RDS/DAB, aktualnie grany preset jako numer (0, gdy nic nie pasuje) i jako lista nazw – wybór wywołuje preset na urządzeniu, budzik,
