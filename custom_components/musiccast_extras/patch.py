@@ -151,6 +151,9 @@ def _netusb_seekable(entity: Any) -> bool:
     """
     if not entity._is_netusb:
         return False
+    zone = entity.coordinator.data.zones.get(entity._zone_id)
+    if zone is None or zone.power != "on":
+        return False  # the device keeps the play info of the last track
     musiccast = entity.coordinator.musiccast
     if isinstance(getattr(type(musiccast), "netusb_seekable", None), property):
         return bool(musiccast.netusb_seekable)

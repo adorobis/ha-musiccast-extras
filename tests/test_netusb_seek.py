@@ -75,6 +75,17 @@ async def test_other_input(hass: HomeAssistant, receiver: Speaker) -> None:
 
 
 @pytest.mark.usefixtures("init_integration")
+async def test_zone_off(hass: HomeAssistant, receiver: Speaker) -> None:
+    """A zone in standby offers no seeking, though the play info still says seekable."""
+    _play(receiver, SEEKABLE)
+    receiver.musiccast.data.zones["main"].power = "standby"
+    receiver.entry.runtime_data.async_update_listeners()
+    await hass.async_block_till_done()
+
+    assert not _seek_supported(hass)
+
+
+@pytest.mark.usefixtures("init_integration")
 async def test_refused(hass: HomeAssistant, receiver: Speaker) -> None:
     """The device refusing a position (e.g. beyond the end) is an error."""
     _play(receiver, SEEKABLE)
@@ -102,9 +113,12 @@ class NewerMusicCastDevice:
 
 class FakePlayer:
     _is_netusb = True
+    _zone_id = "main"
 
     def __init__(self, musiccast: NewerMusicCastDevice) -> None:
-        self.coordinator = type("Coordinator", (), {"musiccast": musiccast})()
+        zone = type("Zone", (), {"power": "on"})()
+        data = type("Data", (), {"zones": {"main": zone}})()
+        self.coordinator = type("Coordinator", (), {"musiccast": musiccast, "data": data})()
 
 
 async def test_newer_aiomusiccast() -> None:
