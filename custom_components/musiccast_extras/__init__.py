@@ -31,7 +31,7 @@ from homeassistant.helpers.storage import Store
 from homeassistant.util import slugify
 
 from . import browse, coordinator as extras_device, patch, url_playback, url_queue
-from .const import DOMAIN, LEGACY_DOMAIN, error
+from .const import CORE_TAKEOVERS, DOMAIN, LEGACY_DOMAIN, error
 from .coordinator import MusicCastExtrasConfigEntry, MusicCastExtrasDevice
 
 _LOGGER = logging.getLogger(__name__)
@@ -138,6 +138,8 @@ async def async_setup_entry(hass: HomeAssistant, entry: MusicCastExtrasConfigEnt
     devices = await extras_device.async_create_devices(hass, entry)
     entry.runtime_data = devices
     _migrate_registry(hass, entry, devices)
+    for device in devices.values():
+        _hand_over_to_core(hass, device)
     extras_device.REGISTRY.update(devices)
     for device in devices.values():
         # Show what the patch adds (CD track, seeking, ...) without waiting for
@@ -202,10 +204,50 @@ async def _async_sync_device(
             device.async_stop_events()  # the extras were unloaded meanwhile
             return
         _LOGGER.info("Adding the extras of %s", core_entry.title)
+        _hand_over_to_core(hass, device)
         devices[device.host] = device
         extras_device.REGISTRY[device.host] = device
         device.core.async_update_listeners()
         async_dispatcher_send(hass, extras_device.SIGNAL_NEW_DEVICE, device)
+
+
+@callback
+def _hand_over_to_core(hass: HomeAssistant, device: MusicCastExtrasDevice) -> None:
+    """Give extras the core integration now provides to its entities.
+
+    Newer aiomusiccast versions turn Surround AI and the speaker pattern
+    into core entities. The extras then don't create theirs (the
+    platforms check core_capability), and here the registry entry of the
+    old extras entity is removed and its entity ID, name, icon, area and
+    hidden state move to the core entity, so automations keep working.
+    The core entity was set up first and got a suffixed ID (_2).
+    """
+    ent_reg = er.async_get(hass)
+    for platform, key, _capability_id, per_zone in CORE_TAKEOVERS:
+        for zone_id in device.features.zones if per_zone else [extras_device.MAIN_ZONE]:
+            core = device.core_capability(key, zone_id)
+            ours = ent_reg.async_get_entity_id(platform, DOMAIN, device.unique_id(key, zone_id))
+            if core is None or ours is None:
+                continue
+            old = ent_reg.entities[ours]
+            ent_reg.async_remove(ours)
+            core_id = ent_reg.async_get_entity_id(core[0], extras_device.MUSICCAST_DOMAIN, core[1])
+            if core_id is None:
+                _LOGGER.info("Removed %s: the MusicCast integration provides it now", ours)
+                continue
+            new = ent_reg.entities[core_id]
+            changes: dict[str, Any] = {"new_entity_id": ours} if core_id != ours else {}
+            for attr in ("name", "icon", "area_id", "hidden_by"):
+                if getattr(old, attr) is not None and getattr(new, attr) is None:
+                    changes[attr] = getattr(old, attr)
+            _LOGGER.info(
+                "%s is now provided by the MusicCast integration (%s): %s",
+                ours,
+                core_id,
+                changes,
+            )
+            if changes:
+                ent_reg.async_update_entity(core_id, **changes)
 
 
 @callback

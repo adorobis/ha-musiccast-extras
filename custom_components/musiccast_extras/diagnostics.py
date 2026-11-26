@@ -46,7 +46,7 @@ async def async_get_config_entry_diagnostics(
     ]
     return async_redact_data(
         {
-            "patch": {"path_inputs": list(patch.PATH_INPUTS)},
+            "patch": {"path_inputs": sorted(patch.PATH_INPUTS)},
             "devices": devices,
         },
         TO_REDACT,

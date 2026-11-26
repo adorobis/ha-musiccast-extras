@@ -39,7 +39,11 @@ def _entities(device: MusicCastExtrasDevice) -> list[SwitchEntity]:
     for zone_id, funcs in f.zones.items():
         status = device.zone_status(zone_id)
         for func, (status_key, setter) in ZONE_SWITCHES.items():
-            if func in funcs and status_key in status:
+            if (
+                func in funcs
+                and status_key in status
+                and not device.core_capability(status_key, zone_id)
+            ):
                 entities.append(ZoneSwitch(device, zone_id, status_key, setter))
     func_status = (device.data or {}).get("func", {})
     entities.extend(

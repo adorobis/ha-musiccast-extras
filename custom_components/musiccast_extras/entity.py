@@ -59,8 +59,7 @@ class MusicCastExtrasEntity(CoordinatorEntity[MusicCastExtrasDevice]):
         self.device = device
         self.zone_id = zone_id
         self.key = key
-        suffix = key if zone_id == MAIN_ZONE else f"{zone_id}_{key}"
-        self._attr_unique_id = f"{device.device_id}_{suffix}"
+        self._attr_unique_id = device.unique_id(key, zone_id)
         self._attr_translation_key = translation_key or key
         if placeholders:
             self._attr_translation_placeholders = placeholders

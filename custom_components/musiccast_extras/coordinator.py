@@ -29,7 +29,7 @@ from homeassistant.helpers.debounce import Debouncer
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.util import dt as dt_util
 
-from .const import DOMAIN, error
+from .const import CORE_TAKEOVERS, DOMAIN, error
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -378,6 +378,32 @@ class MusicCastExtrasDevice(DataUpdateCoordinator[dict[str, Any]]):
         for entry in dr.async_entries_for_config_entry(dev_reg, self.core.config_entry.entry_id):
             if identifier in entry.identifiers:
                 return entry
+        return None
+
+    def unique_id(self, key: str, zone_id: str = MAIN_ZONE) -> str:
+        """Return the unique ID of an extras entity."""
+        suffix = key if zone_id == MAIN_ZONE else f"{zone_id}_{key}"
+        return f"{self.device_id}_{suffix}"
+
+    def core_capability(self, key: str, zone_id: str = MAIN_ZONE) -> tuple[str, str] | None:
+        """Return (platform, core unique ID) when the core has an entity for an extra.
+
+        Newer aiomusiccast versions offer some extras (Surround AI, speaker
+        pattern) as capabilities, which the core integration makes entities of.
+        """
+        for platform, takeover_key, capability_id, per_zone in CORE_TAKEOVERS:
+            if takeover_key != key:
+                continue
+            data = self.core.data
+            if per_zone:
+                zone = data.zones.get(zone_id)
+                capabilities = zone.capabilities if zone is not None else []
+                core_device_id = self.core_device_identifier(zone_id)[1]
+            else:
+                capabilities = data.capabilities
+                core_device_id = self.device_id
+            if any(getattr(c, "id", None) == capability_id for c in capabilities):
+                return platform, f"{core_device_id}_{capability_id}"
         return None
 
     def zone_of_unique_id(self, unique_id: str) -> str | None:

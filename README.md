@@ -158,6 +158,12 @@ device), next to its own entities. Their entity IDs follow the device name, e.g.
 | Alarm 1 … *n* (time, days, source, volume as attributes) | sensor, read-only | clock `multi_alarm` | `clock/getSettings` |
 | Restart, Restart network module | button | `system_reboot`, `network_reboot` | `system/requestSystemReboot`, `requestNetworkReboot` |
 
+Surround:AI and the speaker pattern are also built into aiomusiccast after 0.15.0. Once Home
+Assistant ships such a version, its Yamaha MusicCast integration creates these entities itself
+(the speaker pattern options are then named `pattern_1` … `pattern_n`). MusicCast Extras then
+stops creating its own and gives their entity IDs, names, icons and areas to the core entities,
+so automations and dashboards keep working.
+
 The Yamaha Extended Control API can restart a device or only its network module, which handles
 streaming, MusicCast and DLNA. Restarting the network module helps when streaming hangs while
 the amplifier itself still works.

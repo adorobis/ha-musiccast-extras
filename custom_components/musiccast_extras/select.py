@@ -44,7 +44,7 @@ def _entities(device: MusicCastExtrasDevice) -> list[SelectEntity]:
             if key in auro and options:
                 entities.append(AuroSelect(device, zone_id, key, options, setter, param))
     patterns = f.raw.get("system", {}).get("speaker_pattern_num")
-    if "speaker_pattern" in f.system and patterns:
+    if "speaker_pattern" in f.system and patterns and not device.core_capability("speaker_pattern"):
         entities.append(SpeakerPatternSelect(device, int(patterns)))
     alarm = (device.data or {}).get("clock", {}).get("alarm", {})
     inputs = f.raw.get("clock", {}).get("alarm_input_list", [])
